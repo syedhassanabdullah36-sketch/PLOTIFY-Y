@@ -1,0 +1,632 @@
+# PLOTIFY — PROMPT 35
+## CLIMATE-RESPONSIVE MATERIAL ADVISOR
+**Account A | Locked Roadmap: P35 of P30–P40**
+
+### 1. MISSION
+
+Implement P35 — Climate-Responsive Material Advisor in the existing Plotify Account A codebase.
+
+The goal is to help users select, review, and compare construction materials according to the project's actual climate context, intended use, durability needs, maintenance expectations, confirmed design requirements, and available material evidence.
+
+P35 should transform material selection from a generic catalogue choice into an explainable, context-aware decision process.
+
+Where reliable data exists, the advisor should consider:
+
+- High temperatures and heat exposure.
+- Humidity, wetting, moisture absorption, and drying behaviour.
+- Heavy rainfall and wind-driven rain exposure.
+- Freeze–thaw cycling and cold-weather exposure.
+- Coastal salt exposure and other relevant corrosion risks.
+- Solar radiation and weathering, including UV exposure where supported.
+- Material durability and expected service conditions.
+- Maintenance requirements and replacement considerations.
+- Material availability and cost, where supported by trustworthy data.
+- Material-specific properties relevant to the actual application.
+- Embodied-carbon information only when a genuine, compatible source is available through existing project capabilities.
+- Confirmed user preferences, building requirements, and project constraints.
+
+The advisor should explain why a material may be suitable, conditionally suitable, or unsuitable for a documented exposure condition.
+
+**Core principle: recommend materials based on supported evidence and application context, not generic climate labels, marketing claims, or fabricated material properties.**
+
+P35 is a material-advisory feature. It is not a structural design engine, a complete building-envelope simulation engine, a climate-hazard prediction system, or a substitute for applicable building codes and professional review.
+
+### 2. NON-NEGOTIABLE SCOPE LOCK
+
+1. Implement P35 only.
+2. Preserve the locked Account A roadmap from P30 through P40.
+3. Do not implement P36 Acoustic Comfort Planner or any subsequent feature.
+4. Do not rewrite or replace P30 AI Design Brief Interpreter, P31 Multi-Option Design Comparison, P32 Adaptive Design Personalization, or P33 Furniture & Circulation Intelligence.
+5. Inspect the actual codebase and service contracts before editing any files.
+6. Do not assume previously reported interfaces remain unchanged without inspecting their actual definitions.
+7. Do not access or modify Account B's P41–P50 code.
+8. Do not connect to GitHub, push commits, merge branches, or perform cross-account integration.
+9. Do not invent climate data, material characteristics, product certifications, test results, prices, availability, service lives, or emission factors.
+10. Do not assign a climate zone or precise geographic location without a genuine, traceable source or explicit user input.
+11. Do not claim a material is universally suitable, structurally safe, code-compliant, waterproof, fire-resistant, or maintenance-free without sufficient applicable evidence.
+12. Do not treat missing data as proof of suitability.
+13. Do not let a material preference or aggregate score override confirmed mandatory requirements.
+14. Do not introduce an external API, paid service, dataset, or dependency without reviewing its compatibility, licence, cost, maintenance, and security implications.
+15. Do not duplicate P44's carbon engine, P45's climate-hazard analysis, or P46's future envelope-performance engine.
+16. Preserve existing project IDs, room geometry, facade/interior specifications, budget, design alternatives, site context, and unrelated metadata.
+17. Do not weaken existing tests to make P35 pass.
+18. Prioritize accurate, explainable recommendations over the number of catalogued materials.
+
+### 3. INSPECT THE ACTUAL CODEBASE FIRST
+
+Before changing files, inspect and document the current implementation.
+
+**Project and material models**
+- The actual `Project` type and its units, plot dimensions, floors, rooms, facade specifications, and interior specifications.
+- `DesignAlternative` and `DesignScenario` definitions and their current uses.
+- Existing facade and interior material fields, including style, primary material, cost tier, shading strategy, and any other relevant properties.
+- Existing material catalogues, component definitions, cost-planning services, and material-related UI.
+- Existing site context, geographic location, orientation, climate-related metadata, and their provenance.
+- Existing structural and geometry services that provide useful context without proving material suitability.
+
+**P30 — AI Design Brief Interpreter**
+- Confirmed material and finish requirements.
+- Explicit user preferences versus unconfirmed AI-inferred suggestions.
+- Requirements, conflicts, and review-status handling.
+
+**P31 — Multi-Option Design Comparison**
+- Existing material/specification alternative representations.
+- Current comparison criteria and their data contracts.
+- Whether material properties can be exposed through an isolated, typed interface without changing P31's calculations unnecessarily.
+
+**P32 — Adaptive Design Personalization**
+- Existing preference profiles, confirmation states, and scoring behaviour.
+- How explicit material preferences are represented.
+- Existing separation between hard constraints and soft preferences.
+
+**P33 — Furniture & Circulation Intelligence**
+- Existing room/furniture models only where relevant to finishes, interior specifications, or material application context.
+- Avoid introducing dependencies on furniture or circulation behaviour that P35 does not need.
+
+**Application infrastructure**
+- Current project persistence, storage limits, snapshots, versioning, and rollback.
+- Navigation, workspace routing, component styling, and form conventions.
+- Existing report/export services.
+- Current tests, verification runner, TypeScript/lint commands, and production-build process.
+
+Before implementation, record the available material data, missing climate information, reusable components, planned file changes, and major risks.
+
+Then implement the strongest useful P35 capability supported by the actual codebase. Do not stop after an audit report unless a genuine blocker makes implementation unsafe.
+
+### 4. CLIMATE CONTEXT AND DATA GOVERNANCE
+
+Build an explicit climate-context model rather than relying on a single broad climate label.
+
+Where supported, represent relevant conditions such as:
+
+- Typical and extreme temperature ranges.
+- Humidity and moisture exposure.
+- Precipitation patterns and wetting exposure.
+- Freeze–thaw conditions.
+- Solar radiation and UV exposure.
+- Coastal salt or other aggressive environmental exposure.
+- Wind-driven rain.
+- Other documented environmental conditions relevant to material durability.
+
+Not every project will have every input.
+
+**Required source hierarchy**
+
+Prefer, as applicable:
+
+1. Official national meteorological and climate data.
+2. Applicable, properly documented climatic design data.
+3. Relevant standards and official technical guidance.
+4. Manufacturer technical data and test reports for the actual product.
+5. Environmental product declarations or other verified product records when relevant.
+6. Traceable generic material datasets and recognized technical references.
+7. Explicitly labelled user-entered assumptions when reliable external data is unavailable.
+
+Reference sources to investigate where applicable:
+
+- ASHRAE climatic design information: https://www.ashrae.org/technical-resources/standards-and-guidelines/titles-purposes-and-scopes
+- UNEP, A Practical Guide to Climate-resilient Buildings & Communities: https://www.unep.org/en/publications/report/practical-guide-climate-resilient-buildings-communities
+- European Commission technical guidance on adapting buildings to climate change: https://circular-cities-and-regions.ec.europa.eu/support-materials/papers-and-reports/eu-level-technical-guidance-adapting-buildings-climate-0
+- U.S. EPA, Moisture Control Guidance for Building Design, Construction and Maintenance: https://www.epa.gov/indoor-air-quality-iaq/moisture-control-guidance-building-design-construction-and-maintenance-0
+- ASHRAE Handbook, Heat, Air, and Moisture Control in Building Assemblies — Material Properties: https://handbook.ashrae.org/Handbooks/F25/SI/F25_Ch26/F25_Ch26_si.aspx
+
+These are reference starting points, not proof of a working software integration or universally applicable rules.
+
+Requirements:
+
+- Inspect the source's actual geographic coverage and applicable edition.
+- Verify whether the data can legally be used or redistributed.
+- Preserve source references, versions, units, and applicable limitations.
+- Distinguish observations from climatological averages and design-condition statistics.
+- Distinguish local climate data from a broad country-level description.
+- Record the date and method of data retrieval when relevant.
+- Never label an unconfigured source as connected or live.
+- Never invent a climate-zone number, temperature statistic, rainfall value, or humidity level.
+
+If the project location is absent or ambiguous, ask the user to specify a supported location or explicitly configure the relevant climatic conditions. Do not silently infer exact coordinates from an address or a regional label.
+
+If reliable climate data cannot be obtained, allow an explicitly labelled manual-input or general-screening workflow where appropriate. Make clear that the resulting recommendations are conditional on those inputs.
+
+### 5. MATERIAL CATEGORIES AND APPLICATIONS
+
+Inspect existing project specifications and implement material categories appropriate to the current Plotify data model.
+
+Potential categories include:
+
+- Roof covering and exposed roof finishes.
+- External walls and facade cladding.
+- Masonry and exposed stone.
+- Concrete and cementitious materials.
+- Timber and engineered wood products.
+- Metal cladding and exposed metal components.
+- Windows, frames, and glazing specifications.
+- Insulation and suitable moisture-control materials.
+- Interior walls, partitions, and finishes.
+- Flooring and floor finishes.
+- Coatings, sealants, and protective treatments.
+- Other building materials already represented by genuine project fields.
+
+Do not create a huge catalogue merely to make the feature appear comprehensive.
+
+Start with a maintainable, evidence-backed subset that maps to actual Plotify project specifications.
+
+For each material/application pair, determine which properties are relevant. The requirements for exterior masonry may differ significantly from the requirements for interior finishes or roof membranes.
+
+Do not treat a material as suitable for every application simply because its generic material category matches.
+
+### 6. MATERIAL PROPERTY MODEL AND PROVENANCE
+
+Inspect existing material types before introducing new contracts.
+
+If necessary, define a minimal, typed, backward-compatible model for a material candidate.
+
+Potential fields include:
+
+- Material or product identifier.
+- Display name and category.
+- Intended building application.
+- Generic material class or verified product identity.
+- Relevant thermal properties.
+- Relevant moisture and weathering properties.
+- Relevant durability or exposure-resistance properties.
+- Applicable temperature or exposure limits, when established.
+- Maintenance information.
+- Expected service-life information, with source and scope.
+- Cost information, where supported.
+- Embodied-carbon reference, only when compatible existing data exists.
+- Source organisation, document, dataset version, and publication date.
+- Test method or standard, where available.
+- Applicable geography and usage context.
+- Evidence status and known limitations.
+
+Use existing repository conventions rather than blindly creating every conceptual field.
+
+**Every important material property must carry adequate context.**
+
+A value such as thermal conductivity, water absorption, corrosion resistance, or service life is not meaningful without its units, product/application context, source, and applicable conditions.
+
+Distinguish among:
+
+- `verified-product-data`
+- `traceable-generic-data`
+- `user-entered`
+- `illustrative-default`
+- `unavailable`
+- `requires-verification`
+
+Use names consistent with the actual codebase while preserving these distinctions.
+
+A user-entered property must not become independently verified merely because it passed numeric validation. An illustrative default must not be presented as a manufacturer specification.
+
+### 7. CLIMATE-RESPONSIVE MATERIAL SUITABILITY
+
+Implement deterministic, inspectable rules that evaluate material candidates against actual climate and application inputs.
+
+The evaluator must identify:
+
+- Relevant climate exposures.
+- Material properties needed for the evaluation.
+- Actual known values.
+- Applicable suitability criteria.
+- Evidence supporting the result.
+- Missing properties and unresolved conditions.
+- Potential maintenance or durability concerns.
+- Whether the result is general advice or a standards-based assessment.
+
+Use distinct result states such as:
+
+- `suitable-for-screened-conditions`
+- `conditionally-suitable`
+- `concern-identified`
+- `not-recommended-for-screened-conditions`
+- `insufficient-evidence`
+- `not-assessed`
+- `requires-professional-review`
+
+These are conceptual states; follow repository conventions while maintaining their semantic distinction.
+
+#### A. Heat exposure and solar conditions
+
+Consider relevant material properties, when available, such as:
+
+- Thermal conductivity.
+- Heat capacity and thermal mass.
+- Solar reflectance.
+- Emissivity.
+- UV/weathering resistance.
+- Temperature-related durability limits.
+
+Explain the property that supports the recommendation and whether it describes the material alone or an actual assembly.
+
+Do not infer indoor temperature, cooling load, overheating risk, or energy savings from material properties alone.
+
+#### B. Humidity, wetting and moisture
+
+Consider relevant evidence for:
+
+- Water absorption.
+- Moisture sensitivity.
+- Drying potential or vapour-related properties, where appropriate data exists.
+- Exposure to rainfall and wetting.
+- Protective treatment and maintenance needs.
+- Material degradation under documented conditions.
+
+Do not equate water resistance with waterproof performance or assume that a material is appropriate for every wall or roof assembly.
+
+Avoid recommendations that could create moisture-trapping or condensation concerns based only on a single isolated property. Where assembly behaviour is important, explain that an assembly-level assessment is needed.
+
+#### C. Freeze–thaw exposure
+
+Where relevant, consider supported evidence of freeze–thaw resistance, saturation sensitivity, product suitability, and the applicable exposure conditions.
+
+Do not assign freeze–thaw suitability merely from a material's generic name.
+
+#### D. Coastal salts and corrosive environments
+
+Consider documented corrosion or salt-exposure resistance, material grade, product finish, protective coating, maintenance, and environmental severity where available.
+
+Do not infer a metal's corrosion resistance from its colour, generic name, or appearance.
+
+#### E. Solar and weathering exposure
+
+Use supported product/application evidence for UV and weathering resistance.
+
+Do not claim decades of exterior durability when the supplied data only covers a short laboratory test or lacks an applicable exposure context.
+
+#### F. Wildfire or other specialized exposure
+
+Only provide material guidance for wildfire-related or other specialized conditions where the relevant exposure, material properties, and applicable criteria are supported.
+
+Do not claim fire resistance, fire rating, ignition performance, or code compliance from generic material labels.
+
+#### G. General construction durability
+
+Where the data supports it, consider maintenance, expected service conditions, documented exposure limits, and known incompatibilities.
+
+Do not present generic expected service life as a guarantee.
+
+### 8. MATERIAL ASSEMBLIES AND COMPATIBILITY
+
+Material suitability often depends on the assembly rather than one isolated material.
+
+Where the current project model supports assembly-level information, consider relevant relationships such as:
+
+- Exterior material and protective finish.
+- Insulation and moisture-control layers.
+- Compatible substrates, coatings, and fixings.
+- Exposure to water and suitable drainage/drying details.
+- Different materials joined in the same component.
+- Known maintenance requirements for the assembled system.
+
+Only implement compatibility rules that can be explained and supported by available data.
+
+Do not create a complete hygrothermal, thermal-bridge, corrosion, structural, or envelope-simulation engine inside P35.
+
+If assembly details are missing, report the limitation and provide a conditional recommendation instead of asserting compatibility.
+
+### 9. MATERIAL COMPARISON AND EXPLAINABLE RANKING
+
+Allow users to compare real material candidates for a selected application.
+
+Where data supports it, compare:
+
+- Climate-related suitability.
+- Durability evidence.
+- Required maintenance.
+- Relevant thermal or moisture properties.
+- Expected service-life assumptions.
+- Cost and local availability.
+- User preferences.
+- Existing design constraints.
+- Carbon information only when supplied by a compatible, traceable source.
+
+Every comparison must disclose which criteria have data and which remain unavailable.
+
+Do not create a single composite score that hides material safety or durability concerns.
+
+If a user-adjustable weighted ranking is implemented:
+
+1. Keep mandatory constraints separate from preferences.
+2. Document all weights and normalization.
+3. Ensure units and definitions are comparable.
+4. Distinguish unavailable properties from negative evidence.
+5. Prevent missing data from silently improving a candidate's score.
+6. State how missing data affects ranking.
+7. Explain the leading trade-offs.
+8. Report when results are sensitive to assumptions.
+9. Preserve the raw criterion-level evidence.
+10. Do not call an option the universally best material.
+
+A high preference score must never override an applicable mandatory material requirement.
+
+If the data is insufficient for a defensible ranking, present the available side-by-side evidence without forcing a score.
+
+### 10. P30, P31, P32 AND P33 COMPATIBILITY
+
+Inspect actual upstream interfaces before reusing them.
+
+**P30 — AI Design Brief Interpreter**
+
+Where supported, read confirmed material and design requirements.
+
+- Distinguish user-confirmed requirements from unconfirmed AI assumptions.
+- Surface conflicts between the brief and a proposed material.
+- Do not rewrite the original brief.
+- Do not turn a preference into a statutory requirement without an applicable rule source.
+
+**P31 — Multi-Option Design Comparison**
+
+Where supported, expose a typed material-suitability summary or comparison interface.
+
+- Preserve P31's existing comparison formulas.
+- Do not reimplement its spatial, budget, or geometry metrics inside P35.
+- Keep material suitability criteria distinct from general option scores.
+- Ensure missing material evidence remains visible in comparisons.
+
+**P32 — Adaptive Design Personalization**
+
+Where supported, use explicit and confirmed material preferences.
+
+- Keep hard constraints separate from soft preferences.
+- Distinguish confirmed preferences from inferred suggestions.
+- Explain how a preference influenced a recommendation.
+- Do not silently change P32's preference profile.
+
+**P33 — Furniture & Circulation Intelligence**
+
+Reuse P33 data only if a material application genuinely needs it. Do not introduce an unnecessary furniture/circulation dependency.
+
+If an upstream interface is missing or incompatible, implement the supported P35 subset and document the gap. Do not secretly reimplement P30–P33.
+
+### 11. P44, P45 AND P46 SCOPE BOUNDARIES
+
+Account B contains separate P41–P50 roadmap features, but its code must not be assumed present in Account A.
+
+**P44 — Embodied & Whole-Life Carbon Assessment**
+
+- Do not import or recreate Account B's P44 carbon engine.
+- If Account A has an existing carbon calculator or material-carbon field, inspect its actual implementation and preserve its formula.
+- Use carbon values only where a real, compatible source is available.
+- Distinguish material suitability from carbon performance.
+- Do not claim a material is low-carbon without adequate evidence and compatible system boundaries.
+- Document a future integration interface rather than integrating Account B code.
+
+**P45 — Climate Hazard & Resilience Analyzer**
+
+- Do not build a hazard-exposure or climate-risk mapping engine.
+- P35 may use supported project climate information or an explicitly selected climate profile.
+- Do not assume Account B's P45 data providers or risk models exist.
+- Record how future climate data could be connected through a clean, documented interface.
+
+**P46 — Building Envelope Performance Analyzer**
+
+- Do not implement P46's dedicated building-envelope performance simulation.
+- P35 may compare known material properties relevant to envelope design.
+- Do not claim assembly-level thermal performance, condensation safety, or envelope compliance from isolated material data alone.
+
+### 12. FUTURE ROADMAP BOUNDARIES: P36–P40
+
+Keep P35 focused on climate-responsive material advice.
+
+- **P36 — Acoustic Comfort Planner:** Do not implement an acoustic simulation engine.
+- **P37 — Natural Ventilation Scenario Analyzer:** Do not implement ventilation simulation.
+- **P38 — Daylight & Visual Comfort Analyzer:** Do not implement daylight simulation.
+- **P39 — Design Rationale & Decision History:** Record P35's own recommendation evidence, but do not build the complete decision-history system.
+- **P40 — Design Quality Benchmark & Improvement Loop:** Do not build a universal design-quality benchmark or automated quality-improvement engine.
+
+Document useful extension points without implementing later roadmap features prematurely.
+
+### 13. MATERIAL CATALOGUE, IMPORT AND DATA VALIDATION
+
+Create or extend a small, maintainable material catalogue.
+
+Requirements:
+
+- Use real existing catalogue records where available.
+- Keep generic materials distinguishable from named products.
+- Store units, evidence status, source references, and applicability context.
+- Support user-provided records only through explicit validation and provenance labelling.
+- Reject malformed numeric values and incompatible units.
+- Avoid duplicate material IDs.
+- Preserve the source record during edits.
+- Distinguish a user-confirmed value from an externally verified property.
+- Provide a clear way to review or remove a user-entered material.
+- Do not invent certifications or source citations.
+- Do not scrape manufacturer data or introduce a new external integration without validating the licence and implementation requirements.
+
+If no suitable external data service exists, implement the most useful supported catalogue workflow offline rather than presenting fake live data.
+
+### 14. USER EXPERIENCE AND EXPLAINABILITY
+
+Create a guided Climate-Responsive Material Advisor workspace that follows existing Plotify conventions.
+
+Suggested stages:
+
+1. **Project Context:** Review location, known climate conditions, application, and available source evidence.
+2. **Select Application:** Choose the building component or material use case supported by the actual model.
+3. **Browse Materials:** Inspect available material candidates and their documented properties.
+4. **Assess Suitability:** Review climate exposures, compatibility findings, missing properties, and concerns.
+5. **Compare Options:** Compare real candidates side by side using documented criteria.
+6. **Preview Selection:** Inspect a proposed specification change without modifying the saved design.
+7. **Evidence & Report:** Review sources, assumptions, limitations, and the recommendation rationale.
+
+Every recommendation should answer:
+
+- What is being recommended?
+- For which building application?
+- Under which documented climate conditions?
+- Which material properties support the recommendation?
+- Which evidence is missing?
+- What are the principal trade-offs?
+- What conditions or professional checks are still required?
+
+Use clear status labels and textual explanations rather than colour-only ranking.
+
+Include loading, empty, unavailable-data, partial-evidence, error, and success states.
+
+### 15. PREVIEW, APPLY, PERSISTENCE AND ROLLBACK
+
+Inspect existing project-update and snapshot services before changing project specifications.
+
+Requirements:
+
+1. Preview a material selection before changing the saved project.
+2. Identify the exact project fields that will change.
+3. Keep the original specification intact until the user confirms a supported edit.
+4. Validate the chosen material against known requirements before application.
+5. Create an appropriate safety checkpoint where the existing architecture provides one.
+6. Apply changes through the existing project-update mechanism.
+7. Preserve project, room, scenario, and alternative identifiers.
+8. Preserve user-confirmed P30 requirements and P32 preferences.
+9. Avoid overwriting unrelated fields or other project metadata.
+10. Ensure cancellation and failed operations leave saved state unchanged.
+11. Use existing persistence rather than introducing a competing storage system.
+12. Report save failures honestly.
+13. Ensure previous recommendations are not shown as current if the source climate context, material properties, or relevant project specifications have changed.
+
+If the existing project model requires a new material-selection field, introduce the smallest optional, backward-compatible extension justified by inspection.
+
+### 16. TESTING AND REGRESSION
+
+Create a dedicated P35 verification suite and register it in the actual verification runner according to repository conventions.
+
+Cover the following where implemented.
+
+**A. Material records and provenance**
+- Valid and invalid property data.
+- Units and conversions.
+- Generic versus product-specific records.
+- Source and version tracking.
+- Missing or unverified properties.
+- Duplicate identifiers.
+- Malformed catalogue import.
+
+**B. Climate suitability**
+- Known hot-condition material cases.
+- Moisture and wetting cases.
+- Freeze–thaw conditions where supported.
+- Salt/corrosion exposures where supported.
+- Weathering and UV properties where supported.
+- Incomplete climate data.
+- Unknown or conflicting source information.
+- No fabricated climate values.
+- Correct conditional and unassessed statuses.
+
+**C. Comparison logic**
+- Reproducible calculations for identical inputs.
+- Hard constraints separate from soft preferences.
+- Missing-data handling.
+- Sensitivity to optional preference weights.
+- Comparable units and definitions.
+- Correct explanation of source data and trade-offs.
+
+**D. Existing-module compatibility**
+- P30 brief regression.
+- P31 comparison regression.
+- P32 personalization regression.
+- P33 furniture/circulation regression.
+- Existing project persistence and rollback tests.
+
+**E. Data integrity**
+- Preview does not mutate saved specifications.
+- Confirmed application changes only intended fields.
+- Failed application preserves original project state.
+- Changes to climate context or material data invalidate stale recommendations.
+- Legacy projects without P35 metadata remain loadable.
+
+**F. System verification**
+- Run the new P35 test suite.
+- Inspect and execute the actual full verification runner.
+- Run the repository's real TypeScript/lint checks.
+- Run the production build.
+
+Report exact commands, actual executed suite counts, failures, and observed outcomes. Do not claim a test passed if it was not run. Do not remove or weaken existing tests.
+
+### 17. DOCUMENTATION
+
+Create a technical specification following existing repository conventions, such as:
+
+`docs/P35_CLIMATE_RESPONSIVE_MATERIAL_ADVISOR_SPECIFICATION.md`
+
+Document:
+
+- Actual initial architecture findings.
+- Supported material categories and application types.
+- Climate-context inputs and source hierarchy.
+- Material-property schema, units, and provenance.
+- Suitability rules and calculation methods.
+- Treatment of missing evidence.
+- Material comparison and ranking.
+- P30–P33 interfaces actually reused.
+- Existing carbon-data limitations.
+- Preview, apply, persistence, and rollback.
+- Exact files created or modified.
+- Tests executed and results.
+- Known limitations and unresolved defects.
+- Future integration interfaces and P36–P40 boundaries.
+
+Do not describe a planned connector, unsupported property, or future feature as already implemented.
+
+### 18. ACCEPTANCE CRITERIA
+
+P35 is ready for review only when:
+
+1. The actual repository and upstream interfaces have been inspected.
+2. The material catalogue contains only supported and clearly labelled data.
+3. Climate context and its source are explicit.
+4. Material suitability rules are documented and reproducible.
+5. Missing data does not silently produce a suitable-material recommendation.
+6. Generic material records are not mislabelled as verified products.
+7. Recommendations explain their evidence, limits, and trade-offs.
+8. Mandatory constraints remain separate from user preferences.
+9. Existing project material specifications are preserved until user confirmation.
+10. P30–P33 regression tests pass, or existing failures are honestly identified.
+11. P35 tests, lint/typecheck, and production-build outcomes are accurately reported.
+12. Known limitations and changed files are documented.
+13. P36–P40 have not been implemented.
+14. No Account B files, GitHub operations, or cross-account integration have been used.
+15. P35 is not marked Verified, Approved, or Complete unless its required checks genuinely passed.
+
+### 19. REQUIRED FINAL IMPLEMENTATION REPORT
+
+Provide a structured report covering:
+
+1. Initial inspection findings.
+2. Exact files created and modified.
+3. Supported material categories and application types.
+4. Climate inputs and their actual sources.
+5. Material properties, units, and evidence status.
+6. Suitability rules, calculations, and limitations.
+7. Material comparison and recommendation logic.
+8. Missing-data and uncertainty handling.
+9. P30–P33 compatibility and regression results.
+10. Existing carbon-calculation compatibility without duplicating P44.
+11. Preview, safe application, persistence, and rollback.
+12. Exact commands and actual test results.
+13. Actual verification-suite count, lint/typecheck, and production-build results.
+14. Known limitations, unsupported capabilities, and remaining defects.
+15. Future integration interfaces and shared-file risks.
+16. Confirmation that P36–P40, Account B modules, GitHub operations, and cross-account integration were not performed.
+17. Acceptance criteria that passed, failed, or remain unverified.
+
+**Final priority: climate-appropriate recommendations, traceable material properties, honest uncertainty, user-controlled changes, maintainable architecture, and future integration readiness.**

@@ -1,0 +1,695 @@
+# PLOTIFY — PROMPT 34
+## UNIVERSAL ACCESSIBILITY REVIEW
+**Account A | Locked Roadmap: P34 of P30–P40**
+
+### 1. MISSION
+
+Implement P34 — Universal Accessibility Review in the existing Plotify Account A codebase.
+
+The objective is to evaluate how well a building design supports accessibility and usability across relevant spaces, circulation routes, entrances, doors, furniture arrangements, fixtures, vertical circulation, communication features, and other building elements where the required project data is available.
+
+P34 must build upon the geometry and furniture/circulation foundation provided by P33 while introducing a distinct, evidence-based accessibility assessment engine.
+
+The feature should help users:
+
+- Identify potential accessibility barriers in the current design.
+- Review supported mobility routes, turning areas, clear floor spaces, and maneuvering clearances.
+- Assess applicable door, corridor, ramp, stair, lift, fixture, and reach-related criteria where the relevant geometry and properties are available.
+- Understand which requirements pass, fail, remain uncertain, or cannot be assessed.
+- Inspect the geometric evidence and applicable rule behind each finding.
+- Explore possible design improvements without silently changing the saved project.
+- Compare the effect of proposed improvements on accessibility and existing design constraints.
+- Generate an understandable accessibility review report with evidence, limitations, and unresolved items.
+
+Accessibility must be approached as a multi-dimensional built-environment concern. Mobility is important, but visual communication, hearing-related systems, reach and operation, wayfinding, and other accessibility considerations must not be ignored merely because the current geometry model cannot assess them.
+
+**Core principle: an unassessed requirement is not a pass. A design that passes selected geometric checks must not automatically be declared universally accessible or legally compliant.**
+
+### 2. NON-NEGOTIABLE SCOPE LOCK
+
+1. Implement P34 only.
+2. Preserve the locked Account A roadmap from P30 through P40.
+3. Do not implement P35 Climate-Responsive Material Advisor or any later roadmap feature.
+4. Do not rewrite P30 AI Design Brief Interpreter, P31 Multi-Option Design Comparison, P32 Adaptive Design Personalization, or P33 Furniture & Circulation Intelligence.
+5. Inspect actual types, files, functions, and interfaces before using or modifying them.
+6. Do not assume the previous implementation reports prove that any interface remains unchanged.
+7. Do not access or modify Account B's P41–P50 code.
+8. Do not connect to GitHub, push commits, merge branches, or perform cross-account integration.
+9. Do not invent room dimensions, door positions, clear widths, slopes, ramps, elevators, grab bars, fixtures, signage, alarms, or other building elements.
+10. Do not silently guess applicable laws, standards, jurisdictions, building occupancy, or project classifications.
+11. Do not treat P33's general circulation result as proof that a statutory accessibility requirement passes.
+12. Do not treat unconfirmed P30 assumptions or inferred P32 preferences as established accessibility requirements.
+13. Do not allow a preference score, aesthetic choice, budget score, or convenience recommendation to override an applicable mandatory accessibility rule.
+14. Do not label a design accessible, compliant, certified, or approved without adequate evidence for the specific claim.
+15. Preserve existing project geometry, furniture, identifiers, brief information, scenarios, preferences, and unrelated metadata.
+16. Do not weaken existing tests to make P34 pass.
+17. Prioritize accurate, evidence-backed checks over the number of displayed criteria.
+
+### 3. INSPECT THE ACTUAL CODEBASE FIRST
+
+Before modifying any file, inspect and document the real implementation.
+
+**Project and geometric model**
+- Actual Project, FloorPlanRoom, floor/storey, room-boundary, coordinate, and measurement-unit types.
+- Existing geometry utilities for containment, intersection, dimensions, distance, and overlap.
+- Existing room shapes and their supported geometric limitations.
+- Whether floor elevations, level changes, slopes, thresholds, ramps, stairs, and lift connections are represented.
+- Available wall, opening, door, window, fixture, and circulation-path data.
+
+**P33 — Furniture & Circulation Intelligence**
+- Actual `furnitureLayout` structure, including instances, known openings, clearance thresholds, custom routes, and relevant metadata.
+- Actual furniture footprints and rotation behaviour.
+- The implementation of `evaluateFurnitureIntelligence`.
+- Existing door-opening and swing-region representations.
+- Existing route generation, clearance calculations, and their accuracy limitations.
+- How user-entered openings and thresholds are distinguished from externally verified data.
+- Existing snapshot, save, and rollback behaviour.
+
+Use the actual types and functions you find. Do not assume that a field called `verified` necessarily means survey-verified or independently inspected.
+
+**P30 — AI Design Brief Interpreter**
+- Confirmed requirements, unresolved conflicts, reviewed assumptions, and requirement sources.
+- Actual interfaces for reading confirmed user requirements without changing the original brief.
+
+**P31 — Multi-Option Design Comparison**
+- Existing option models and comparison metrics.
+- Whether the comparison engine can consume or display P34 findings without duplicating its own calculations.
+
+**P32 — Adaptive Design Personalization**
+- Explicit user preferences, confirmation states, hard constraints, and existing scoring behaviour.
+- How to ensure accessibility requirements remain separate from discretionary preferences.
+
+**Application infrastructure**
+- Existing navigation, views, project-state updates, storage, versioning, checkpoints, rollback, and reporting/export services.
+- Existing tests, verification runner, TypeScript/lint commands, and production build.
+- Current accessibility, keyboard interaction, and status-reporting conventions in the UI.
+
+Before editing, record the relevant files, current capabilities, missing data, planned changes, and risks. Then implement the strongest safe P34 capability supported by the actual repository. Do not stop at an audit report unless a real technical blocker prevents safe implementation.
+
+### 4. ACCESSIBILITY REVIEW PROFILES AND RULE GOVERNANCE
+
+Create an explicit accessibility assessment profile rather than treating every building as subject to one universal numeric rule set.
+
+Where supported, the profile should identify:
+
+- Project jurisdiction.
+- Applicable standard, regulation, or explicitly selected guideline.
+- Exact standard edition or rule-set version.
+- Building use and occupancy classification.
+- Project type, where relevant.
+- Whether the assessment relates to new construction, alteration, or an existing facility.
+- The spaces, routes, and building elements included in the review.
+- Applicable rule sections and source references.
+- Criteria that cannot be evaluated using current project data.
+- Any explicitly configured project-specific review assumptions.
+
+If the jurisdiction or applicable standard is unknown, P34 may provide a clearly labelled **general accessibility screening** using explicitly disclosed configurable parameters. It must not present that screening as a legal-compliance review.
+
+**Reference sources to investigate where appropriate:**
+
+- Official U.S. Department of Justice — 2010 ADA Standards for Accessible Design:  
+  https://www.ada.gov/law-and-regs/design-standards/2010-stds/
+
+- Official ISO page — ISO 21542:2021, Building construction — Accessibility and usability of the built environment:  
+  https://www.iso.org/standard/71860.html
+
+These are reference starting points, not universal defaults. The ADA standards have a specific U.S. legal scope. Verify the applicable jurisdiction and current status of any chosen standard before using it.
+
+Use properly licensed or lawfully accessible source material. Do not scrape, reproduce, or embed substantial copyrighted standards text. Store concise citations, section identifiers, applicable rule values, and the necessary source metadata rather than copying entire standards.
+
+If a rule source is not available or its applicability cannot be determined, disclose the limitation instead of inventing a rule.
+
+### 5. CRITERION ENGINE AND RESULT STATES
+
+Implement a typed, deterministic accessibility-rule engine using the repository's existing conventions.
+
+Each assessment criterion should have enough information to explain:
+
+- Criterion identifier.
+- Plain-language description.
+- Applicable rule or configured threshold.
+- Required project inputs.
+- Actual measured or derived result.
+- Units and calculation method.
+- Source and rule-set version.
+- Geometry or project-data references.
+- Assessment status.
+- Uncertainty, missing data, and known limitations.
+- Suggested next action, where useful.
+
+Use distinct result states such as:
+
+- `meets-configured-criterion`
+- `does-not-meet-configured-criterion`
+- `warning`
+- `unassessed`
+- `insufficient-data`
+- `not-applicable`
+- `requires-human-review`
+
+Choose names that fit the actual codebase, but preserve these semantic distinctions.
+
+Important rules:
+
+1. A measurement cannot pass a criterion if required geometry is missing.
+2. Missing data must never silently become zero, a perfect score, or a passing result.
+3. A criterion may be marked not applicable only where the actual applicability conditions support that decision.
+4. A failed accessibility check must not be hidden by a high overall score.
+5. An uncertain input must remain distinguishable from a definite geometric conflict.
+6. Every failed or unassessed critical item must be traceable to its underlying data or missing input.
+7. Calculations must use consistent units and explicit tolerances.
+8. Avoid implying greater precision than the underlying geometry supports.
+
+Do not use an aggregate accessibility score as a substitute for individual mandatory requirements. If a summary percentage is offered, show its denominator, excluded criteria, data coverage, and unassessed requirements.
+
+### 6. ACCESSIBLE ROUTES AND CONTINUITY
+
+Assess the continuity and usability of relevant routes through the building and site where sufficient data exists.
+
+Potential route elements include:
+
+- Entry and exit points.
+- Room-to-room connections.
+- Doorways and openings.
+- Corridors and common circulation spaces.
+- Changes in level.
+- Supported ramps, lifts, elevators, or other vertical access elements.
+- Approaches to required rooms and facilities.
+- Connections between accessible building areas and relevant external access points.
+
+Requirements:
+
+1. Use actual known route and opening data.
+2. Determine whether the reviewed route is geometrically connected rather than relying only on straight-line distances.
+3. Check required widths using the applicable profile or explicitly configured criterion.
+4. Treat turns, narrowing, intersections, and obstructions according to the supported rule logic.
+5. Where floor-to-floor access requires an elevator, lift, or other route element, do not assume a staircase creates an accessible connection.
+6. Identify disconnected route segments and missing connections.
+7. Distinguish geometry-based reachability from a full regulatory assessment of the route.
+8. Include entrance and external approach checks only when the relevant site/building information is available.
+9. Do not invent an entrance or assumed connection because it would make the route pass.
+10. Keep each route result linked to the underlying room, doorway, route, and obstruction identifiers where available.
+
+**Accuracy requirement:** P33's circulation analysis uses a discretized grid. Inspect its resolution and assumptions before reusing any results. A grid-based route may be useful for navigation screening, but it must not automatically prove that a precise mandatory clear-width or maneuvering-clearance requirement passes.
+
+Implement or reuse an appropriately precise geometric check for mandatory dimensions. If precision is insufficient, mark the criterion unassessed or require further review.
+
+### 7. WHEELCHAIR TURNING, MANEUVERING, AND CLEAR FLOOR SPACES
+
+Implement the accessibility geometry checks supported by the actual floor-plan and furniture models.
+
+Potential checks include:
+
+- Wheelchair turning spaces.
+- Turning circles or supported turning-space shapes.
+- T-shaped turning spaces where applicable to the selected rule.
+- Clear floor or ground spaces.
+- Approach and maneuvering space beside doors and fixtures.
+- Required transfer spaces where the relevant fixture and transfer geometry is represented.
+- Required clearances around furniture and fixed obstacles.
+- Interference between required clear spaces and door-swing regions.
+- Interference between required clear spaces and adjacent furniture or fixed building elements.
+
+Requirements:
+
+1. Make the evaluated shape and dimensions explicit.
+2. Use the selected rule profile for the required size and applicability.
+3. Do not use a generic illustrative turning-circle diameter as a legal universal requirement.
+4. Validate the complete shape and its orientation, not merely its centre point.
+5. Check whether the required space is actually unobstructed.
+6. Account for the room boundary and known fixed obstacles.
+7. Consider valid door-swing geometry where the applicable rule requires it.
+8. Report missing fixtures, openings, or room geometry as missing evidence.
+9. Show the result overlay on the floor plan where practical.
+10. Do not describe a circular clearance test as a complete wheelchair-accessibility assessment.
+
+If P33 has rectangular furniture footprints or approximate collision calculations, inspect whether those representations are precise enough for the selected accessibility check. Do not use known approximations as exact compliance evidence without validation.
+
+### 8. DOORS, OPENINGS, AND MANEUVERING CLEARANCES
+
+Assess door and opening accessibility only when the required data is available.
+
+Potential properties include:
+
+- Clear opening width.
+- Door type and opening direction.
+- Door-swing region.
+- Approach side.
+- Latch-side and hinge-side context where the geometry supports it.
+- Maneuvering clearance.
+- Threshold or level-change information.
+- Opening connectivity and usable access to the next space.
+
+Requirements:
+
+1. Use actual known door geometry and explicitly documented properties.
+2. Distinguish measured dimensions from user-entered or inferred properties.
+3. Do not assume that a generic opening width equals the clear opening width.
+4. Do not assume all doors swing in the same direction.
+5. Do not assume door-swing conflicts are absent when the swing direction is unknown.
+6. Evaluate maneuvering space based on the applicable profile and approach configuration.
+7. Preserve the source and confirmation state of the opening information.
+8. Provide a way to identify which missing properties prevent an assessment.
+9. Do not silently edit door geometry to obtain a passing result.
+
+Where P33's `knownOpenings` model requires additional information for a defensible check, introduce only the minimum backward-compatible metadata necessary. Do not replace P33's furniture or opening services.
+
+### 9. RAMPS, WALKING SURFACES, STAIRS, AND VERTICAL ACCESS
+
+Implement checks only where the required geometry is supported.
+
+Potential ramp and walking-surface criteria include:
+
+- Running slope.
+- Cross slope.
+- Clear width.
+- Landing dimensions.
+- Changes in level.
+- Relevant thresholds.
+- Handrail properties and extensions, where represented.
+- Edge protection, where relevant.
+- Surface characteristics, only if actual surface data exists.
+
+Potential stair criteria include:
+
+- Riser and tread dimensions.
+- Stair width.
+- Landing configuration.
+- Handrail properties.
+- Relevant visual and tactile indicators, when represented.
+- Connection to the applicable circulation network.
+
+Potential lift/elevator criteria include:
+
+- Existence of a modeled vertical connection.
+- Connected floors.
+- Door/opening information.
+- Relevant cabin and approach dimensions where available.
+- Required operating and access properties only when represented by the data model.
+
+Do not infer a compliant ramp from a line or two elevation points alone. Do not infer stair tread dimensions from total floor height alone unless a validated geometric model and explicit assumptions support the calculation.
+
+If an element is absent from the project model, report the relevant assessment as unassessed or explain what source data is required.
+
+P34 must not implement an architectural stair generator or other separate feature outside the accessibility-review purpose merely to fabricate evidence.
+
+### 10. ACCESSIBLE FIXTURES AND USABLE SPACES
+
+Assess supported rooms and fixtures where their geometry and attributes exist.
+
+Examples may include:
+
+- Toilet and bathing spaces.
+- Lavatories and sinks.
+- Kitchen work areas and clear floor spaces.
+- Dining or work surfaces.
+- Storage and commonly operated controls.
+- Relevant fixture approaches and transfer spaces.
+- Reach ranges or operable-part properties when the model stores the necessary dimensions.
+- Turning and maneuvering space within the applicable room.
+- Relationship between fixture locations and available access routes.
+
+Requirements:
+
+1. Distinguish room classification from proof that all required fixtures are present.
+2. Do not infer fixture dimensions from room area alone.
+3. Check required clear spaces against known walls, furniture, door swings, and fixed objects.
+4. Use the correct rule scope for the building/space type.
+5. Record missing fixture properties rather than assuming compliance.
+6. Avoid treating a general room-fit result as proof that all required accessibility elements are present.
+7. Do not claim restroom, kitchen, or bathing-room compliance when relevant fixtures or applicable criteria have not been assessed.
+
+### 11. REACH, OPERATION, AND NON-MOBILITY ACCESSIBILITY
+
+Accessibility is broader than wheelchair geometry.
+
+Where the application stores the relevant information, P34 may assess:
+
+- Reachable locations of controls and commonly operated parts.
+- Access to handles, switches, storage, and relevant user interfaces.
+- Protruding-object hazards or clear-route obstruction where their geometry is known.
+- Signage properties and wayfinding information.
+- Visual contrast, tactile indicators, and Braille where data exists.
+- Visual or audible alarm/notification properties where represented.
+- Relevant communication-system and assistive-listening information where modeled.
+- Clear identification of features requiring specialist or human review.
+
+Do not claim to verify a feature that is not represented in project data. For example, a room model without surface colour, signage, alarm, and equipment attributes cannot establish visual, tactile, or hearing-related compliance.
+
+Provide an explicit inventory of accessibility topics that are:
+- Assessed with actual evidence.
+- Partially assessed.
+- Unassessed due to missing data.
+- Outside the supported P34 implementation.
+
+Avoid implying that the geometric model can fully measure cognitive accessibility, inclusive usability, sensory experience, or human interaction. These may require additional data, user research, specialist assessment, or inspection.
+
+### 12. SITE ACCESS AND LEVEL CHANGES
+
+If the existing Account A project model contains suitable site information, assess supported aspects of access between the site entrance, arrival area, and building.
+
+Potential items include:
+
+- Access route geometry.
+- Known level changes.
+- Route continuity.
+- Parking or passenger drop-off features, where represented.
+- External ramps and supported slopes.
+- Accessible approach to building entrances.
+
+Do not assume that Account B's P43 terrain model exists in this workspace. Do not import or implement Account B features.
+
+If site elevation or slope information is missing, the report must make clear that site-level accessibility cannot be fully assessed.
+
+Do not derive legally meaningful ramp slopes or level-change results from rough topographic visualization alone. Use only data whose accuracy and units are appropriate to the selected test.
+
+### 13. RULE EVALUATION AND HUMAN REVIEW
+
+Create a rule evaluation service with deterministic inputs and reproducible outcomes.
+
+For each rule:
+1. Establish applicability.
+2. Validate the required source data.
+3. Normalize units and coordinates.
+4. Execute the appropriate geometric or attribute check.
+5. Compare the result with the configured rule.
+6. Record the outcome and its evidence.
+7. Identify missing information or uncertainty.
+8. Provide a human-readable explanation.
+9. Reference the applicable rule source.
+10. Store enough information to reproduce the assessment.
+
+Separate:
+- Measured geometry.
+- Calculated dimensions.
+- Imported data.
+- User-entered information.
+- Assumed values.
+- Missing information.
+- Human-confirmed observations.
+
+A user confirmation may establish that information was reviewed, but it does not automatically make that information professionally or independently verified.
+
+If a rule depends on a legal interpretation, building classification, special exception, alteration condition, or professional judgment beyond the available inputs, mark it as requiring human review instead of silently selecting an interpretation.
+
+### 14. FINDINGS, SEVERITY, AND REPORT COMPLETENESS
+
+Provide a structured finding for every evaluated problem.
+
+Each finding should include:
+- Finding ID.
+- Associated rule and profile.
+- Affected space, opening, fixture, route, or element.
+- Location or geometric reference where available.
+- Expected or configured value.
+- Observed or computed value.
+- Units and tolerances.
+- Evidence source.
+- Outcome and uncertainty.
+- Explanation of why the criterion does not pass or cannot be assessed.
+- Suggested next action, where appropriate.
+
+Distinguish **rule outcome** from **priority or severity**.
+
+Do not label every warning a legal violation. For general screening, use careful terms such as “potential accessibility barrier” or “review recommended.”
+
+If critical criteria remain unassessed, do not show an overall “compliant” or “fully accessible” result.
+
+A summary can report:
+- Criteria evaluated.
+- Criteria meeting the configured rule.
+- Criteria not meeting the configured rule.
+- Warnings and human-review items.
+- Unassessed criteria.
+- Data coverage and important exclusions.
+- Selected jurisdiction/rule profile and version.
+
+Do not calculate coverage by counting a large number of low-risk checks while ignoring missing critical checks. Keep critical requirements visible separately.
+
+### 15. ACCESSIBILITY IMPROVEMENT SUGGESTIONS
+
+Provide practical, explainable design-improvement suggestions based on actual findings.
+
+Examples may include:
+- Repositioning furniture that blocks a known route.
+- Increasing supported clearance by moving a furniture instance.
+- Adjusting a proposed doorway or circulation layout when the relevant geometry is editable.
+- Revising a supported room layout to provide a required clear space.
+- Identifying missing geometry or properties needed for further review.
+- Comparing alternative arrangements while keeping the original design unchanged.
+
+Each suggestion must:
+1. Reference the finding that triggered it.
+2. Explain which rule or geometric issue it addresses.
+3. Show the proposed change.
+4. Re-run all affected checks on the proposed state.
+5. Identify any new conflicts or trade-offs.
+6. Preserve unrelated project data.
+7. Require explicit user confirmation before applying changes.
+8. Support cancellation and rollback where applicable.
+
+Do not silently move walls, change room sizes, delete furniture, change doors, or alter the user's project to force a pass.
+
+Do not promise that a suggested change resolves a legal accessibility issue if other applicable conditions remain unassessed.
+
+### 16. P30, P31, P32, AND P33 COMPATIBILITY
+
+Use the actual inspected interfaces and preserve the responsibilities of each feature.
+
+**P30 — AI Design Brief Interpreter**
+- Read confirmed accessibility-related requirements where available.
+- Distinguish explicit user requirements from unconfirmed inferred assumptions.
+- Display conflicts between stated requirements and available design data.
+- Do not treat an AI inference as a legal requirement unless it is separately backed by the actual applicable rule source.
+- Do not modify the source brief.
+
+**P31 — Multi-Option Design Comparison**
+- Expose a typed, read-only summary of P34 findings where compatible.
+- Allow actual design options to be compared on clearly defined accessibility criteria.
+- Keep unassessed criteria distinct from passing criteria.
+- Do not change P31's existing metric formulas or scoring logic without a necessary and tested compatibility change.
+- Ensure an overall option score cannot conceal a mandatory accessibility conflict.
+
+**P32 — Adaptive Design Personalization**
+- Read confirmed preferences where appropriate.
+- Preserve explicit accessibility requirements and applicable mandatory rules separately from soft preferences.
+- Do not let aesthetic preferences, budget preferences, or personalized scores override accessibility requirements.
+- Do not treat an inferred preference as a confirmed user need.
+- Do not rewrite the P32 profile.
+
+**P33 — Furniture & Circulation Intelligence**
+- Reuse actual furniture instances, room associations, known openings, clearance configuration, and geometry contracts where appropriate.
+- Preserve P33's catalog and furniture-layout workflow.
+- Do not treat a P33 general clearance result as proof of compliance with a P34 rule.
+- Recheck any criterion requiring greater geometric precision than P33 provides.
+- Keep P34 rule evaluation in a distinct, maintainable service.
+- Avoid duplicating P33's geometry data or persistence mechanisms.
+
+If an upstream interface is absent or insufficient, implement the safe P34 capability supported by the current codebase and document the missing interface. Do not secretly rebuild P30–P33 inside P34.
+
+### 17. DATA MODEL, PERSISTENCE, AND VERSIONING
+
+Inspect the actual Project and report structures before adding new metadata.
+
+If needed, introduce a minimal, optional, backward-compatible assessment record. It may contain concepts such as:
+
+- Assessment ID.
+- Project ID.
+- Assessment profile identifier and version.
+- Rule-set source and version.
+- Assessment timestamp.
+- Reviewed project-state identifier or fingerprint.
+- Criterion results and findings.
+- Source-data references.
+- Missing-data summary.
+- Assumptions and human-review items.
+- Optional saved assessment configuration.
+
+Use actual repository conventions rather than creating every conceptual field blindly.
+
+Requirements:
+1. Keep accessibility assessment records distinct from primary geometry.
+2. Use stable IDs.
+3. Preserve source project data and furniture instances.
+4. Avoid duplicating all project geometry inside each saved review.
+5. Record the project state against which a review was calculated.
+6. Mark prior results stale when relevant geometry, openings, furniture, or applicable rules change.
+7. Do not display a stale review as though it represents the latest design.
+8. Follow existing storage limits.
+9. Use the existing versioning/checkpoint service for confirmed project modifications where appropriate.
+10. Ensure failed or cancelled operations do not leave partial saved changes.
+11. Preserve existing project metadata and backward compatibility.
+12. Do not introduce a second project or storage engine.
+
+A saved assessment must be reproducible from its recorded inputs and rule-profile version to the extent the underlying source data is retained and the calculation implementation supports reproduction.
+
+### 18. USER INTERFACE AND ACCESSIBILITY OF P34 ITSELF
+
+Follow the existing Plotify interface patterns while making the review workspace understandable and usable.
+
+Suggested stages:
+
+1. **Review Scope:** Select assessment type, rule profile, and applicable building context.
+2. **Data Readiness:** Inspect available geometry, missing features, units, and assumptions.
+3. **Accessibility Checks:** Run supported assessments.
+4. **Findings & Evidence:** Inspect results, overlays, sources, and calculation details.
+5. **Improvement Preview:** Review proposed changes without modifying the saved design.
+6. **Assessment Report:** Export findings, scope, data coverage, and limitations.
+
+Provide:
+- Clear result states and legends.
+- Direct links from findings to affected project elements where possible.
+- Keyboard-accessible navigation.
+- Meaningful labels and visible focus states.
+- Status information that is not conveyed by colour alone.
+- Screen-reader-accessible findings and controls.
+- Clear error, loading, empty, incomplete-data, and stale-assessment states.
+
+P34 itself should avoid introducing avoidable accessibility barriers into the UI.
+
+Do not rely exclusively on an SVG overlay or colour-coded floor plan to communicate a critical finding. Provide a textual finding list and an accessible way to inspect each result.
+
+### 19. PERFORMANCE, PRIVACY, AND FAILURE HANDLING
+
+- Keep geometric checks deterministic and testable.
+- Bound expensive route and geometry operations.
+- Avoid unbounded search or repeated full-project recalculation.
+- Prevent stale asynchronous results from overwriting newer assessments.
+- Handle incomplete, stale, malformed, or legacy project records safely.
+- Do not persist unnecessary personal or sensitive information.
+- Do not create personal disability profiles from user behaviour or infer a person's health status.
+- Treat accessibility requirements as project/design constraints, not as a basis for undisclosed personal profiling.
+- Preserve cancellation and error handling.
+- Do not report a successful review save or suggested change until it actually succeeds.
+- Distinguish an application error from a design finding and from an unassessed criterion.
+
+### 20. TESTING AND REGRESSION
+
+Create a dedicated P34 verification suite and register it in the actual verification runner using established repository conventions.
+
+Cover the following where the relevant features are implemented.
+
+**A. Profile and rule selection**
+- Known and unknown jurisdiction.
+- Correct rule-profile version selection.
+- Inapplicable and unsupported criteria.
+- Missing rule-source information.
+- Rule changes that make an earlier assessment stale.
+
+**B. Geometry and clearances**
+- Valid and invalid turning-space geometries.
+- Clear-space overlap with furniture, doors, and room boundaries.
+- Unit conversion and dimension normalization.
+- Door maneuvering areas.
+- Route width and continuity.
+- Changes in level and supported slopes.
+- Multiple floors and supported vertical connections.
+- Geometry with arbitrary rotation where applicable.
+- Invalid or missing dimensions.
+- Insufficient geometry and incomplete data.
+
+**C. Honest result states**
+- Missing geometry never produces a passing result.
+- Unsupported rules remain unassessed.
+- A rule failure cannot be hidden by a high aggregate score.
+- A user-entered property is not falsely labelled independently verified.
+- An absent door is not treated as an accessible door.
+- An unavailable fixture is not automatically treated as compliant.
+
+**D. P33 compatibility**
+- Use real `furnitureLayout` records.
+- Use known openings only through the inspected interface.
+- Test route and clearance cases where P33 approximation is insufficient.
+- Ensure P34 does not mutate P33 furniture instances during assessment.
+- Confirm P33 regression tests remain intact.
+
+**E. P30–P32 compatibility**
+- Confirmed brief requirements are read correctly.
+- Unconfirmed assumptions remain distinguishable.
+- Personalization cannot override mandatory accessibility rules.
+- P31 comparison summaries preserve missing-data states.
+- Stale upstream data invalidates affected results appropriately.
+
+**F. Safety**
+- Preview does not mutate the saved project.
+- Applying a confirmed change uses the actual safe-update path.
+- Failed application preserves the existing project.
+- Snapshot and rollback behave as documented.
+- Unrelated project domains remain unchanged.
+
+**G. System verification**
+- Run the P34 test suite.
+- Run relevant existing P30–P33 regression tests.
+- Inspect and run the actual full verification suite.
+- Run real TypeScript/lint checks.
+- Run the production build.
+
+Report exact commands, actual suite counts, results, and failures. Do not remove or weaken existing tests. Do not mark unexecuted tests as passing.
+
+### 21. DOCUMENTATION
+
+Create a specification following existing conventions, such as:
+
+`docs/P34_UNIVERSAL_ACCESSIBILITY_REVIEW_SPECIFICATION.md`
+
+Document:
+- The actual pre-implementation findings.
+- Supported accessibility checks and limitations.
+- The selected profile and rule-source handling.
+- Data model and persistence.
+- Calculation rules and units.
+- P33 integration and precision limits.
+- P30–P32 compatibility.
+- How the engine distinguishes findings from missing data.
+- Improvement suggestions and safe application.
+- Actual tests executed and observed outcomes.
+- Known limitations and unresolved defects.
+- Future integration requirements.
+- Confirmation that P35–P40 and cross-account integration were not implemented.
+
+Do not describe planned features as already implemented.
+
+### 22. ACCEPTANCE CRITERIA
+
+P34 is ready for review only when:
+
+1. The real codebase and P30–P33 interfaces have been inspected.
+2. The assessment profile clearly identifies applicable rules and scope.
+3. The feature does not apply a single jurisdiction's requirements universally.
+4. Supported accessibility criteria have documented rules, data needs, and calculation methods.
+5. Turning spaces, clear floor spaces, routes, and door maneuvering areas are evaluated correctly for the supported geometry.
+6. Missing data never produces a false passing result.
+7. P33 approximate route checks are not automatically treated as statutory proof.
+8. Relevant accessibility dimensions use valid units and suitable geometric precision.
+9. Findings are traceable to sources, measurements, and affected elements.
+10. Improvement suggestions are previewed and require explicit confirmation before changing the project.
+11. P30–P33 remain functional and their regression tests pass, or any pre-existing failures are honestly identified.
+12. Existing storage, project IDs, versioning, and rollback remain intact.
+13. P34 tests, typecheck/lint, and production-build outcomes are accurately reported.
+14. Known limitations and future integration requirements are documented.
+15. P35–P40 have not been implemented.
+16. No GitHub operation or cross-account integration has occurred.
+17. P34 is not marked Verified, Approved, or Complete unless the required checks genuinely passed.
+
+### 23. REQUIRED FINAL IMPLEMENTATION REPORT
+
+Return a structured report containing:
+
+1. **Initial inspection:** What the actual codebase contained.
+2. **Implementation summary:** Real accessibility capabilities added.
+3. **Files created and modified:** Exact paths and reasons.
+4. **Rule profiles:** Applicable standards, editions, sources, and supported scope.
+5. **Geometry engine:** Actual turning, maneuvering, route, door, ramp, stair, and fixture checks.
+6. **Non-mobility checks:** Supported reach, sensory, communication, and wayfinding criteria.
+7. **Missing-data behaviour:** How unassessed criteria and limitations are shown.
+8. **Findings and evidence:** How each result can be traced to source data and rules.
+9. **P30–P33 compatibility:** Interfaces reused and regression results.
+10. **Project safety:** Persistence, stale-review handling, preview, snapshots, and rollback.
+11. **Tests:** Exact commands, outcomes, failures, and actual suite counts.
+12. **Build results:** TypeScript/lint and production-build outcomes.
+13. **Known limitations:** Unsupported elements, incomplete standards coverage, and human-review requirements.
+14. **Future integration:** Shared-file changes, dependencies, and contract risks.
+15. **Scope confirmation:** Confirm P35–P40, GitHub operations, and cross-account integration were not performed.
+16. **Status:** Identify acceptance criteria passed, failed, and unverified.
+
+**Final priority: accessibility evidence, correct geometric evaluation, jurisdiction-aware rules, honest handling of unknown data, user-controlled improvements, and maintainable integration with P30–P33.**

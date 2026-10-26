@@ -1,0 +1,877 @@
+# P36 — ACOUSTIC COMFORT PLANNER
+## Production-Minded Implementation Specification — Plotify Account A
+
+**Roadmap ID:** P36  
+**Feature:** Acoustic Comfort Planner  
+**Phase:** Account A — Design Intelligence Roadmap  
+**Implementation mode:** Inspect first, implement only the scoped feature, verify, and report honestly  
+**Primary objective:** Deliver a trustworthy, useful, geometry-aware acoustic design workspace that improves architectural decisions without pretending to be a certified acoustic simulation or compliance engine.
+
+---
+
+# 1. MISSION
+
+Implement P36 — Acoustic Comfort Planner — inside the existing Plotify codebase.
+
+The module must help users understand how room geometry, surface materials, furniture, adjacency, occupancy assumptions, and noise sources can influence acoustic comfort. It must translate available design information into understandable estimates, warnings, recommendations, and actionable improvement options.
+
+This is not merely a form with a noise score. It must connect available architectural data to explainable acoustic calculations and design decisions.
+
+The completed module should support five practical questions:
+
+1. **Will this room likely have excessive reverberation or echo?**
+2. **What surfaces and furnishings are contributing most to the estimated acoustic result?**
+3. **Which available design changes could improve the room’s acoustic performance?**
+4. **Where might sound transfer, unwanted noise, or inadequate acoustic privacy be concerns?**
+5. **How confident can Plotify be in each conclusion, given the data actually available?**
+
+The application must distinguish calculations, measured evidence, product-specific evidence, engineering assumptions, and preliminary screening recommendations.
+
+Do not claim that the result replaces a qualified acoustician, on-site sound measurements, a validated acoustic simulation, or jurisdiction-specific professional review.
+
+# 2. NON-NEGOTIABLE SCOPE LOCK
+
+Implement P36 only.
+
+The following roadmap boundaries are locked:
+
+- P30 — AI Design Brief Interpreter
+- P31 — Multi-Option Design Comparison
+- P32 — Adaptive Design Personalization
+- P33 — Furniture & Circulation Intelligence
+- P34 — Universal Accessibility Review
+- P35 — Climate-Responsive Material Advisor
+- P36 — Acoustic Comfort Planner — implement now.
+- P37 — Natural Ventilation Scenario Analyzer — future scope.
+- P38 — Daylight & Visual Comfort Analyzer — future scope.
+- P39 — Design Rationale & Decision History — future scope.
+- P40 — Design Quality Benchmark & Improvement Loop — future scope.
+
+P36 may consume relevant existing P30–P35 data using current supported contracts, but must not reimplement their engines, overwrite their authoritative data, or absorb their future roadmap responsibilities.
+
+Do not implement airflow simulation, daylight analysis, the P39 decision-history engine, or the P40 benchmarking and improvement loop.
+
+Do not merge Account A with Account B. Do not modify or integrate another account or repository. Do not perform unrelated GitHub, cloud-provisioning, authentication, infrastructure, or deployment work.
+
+Do not rewrite existing working modules merely to simplify P36.
+
+# 3. INSPECT BEFORE EDITING
+
+Before modifying any file, inspect the actual project.
+
+Identify and document internally:
+
+- The framework, language, build system, test runner, and existing architectural conventions.
+- The real project type and persistence mechanism.
+- How workspaces, navigation, sidebar entries, project overviews, and shared component styles are implemented.
+- Current project geometry and room representations, including dimensions, height, areas, units, and openings where available.
+- The actual facade, room, material, and surface schemas.
+- How P30 records confirmed requirements and unconfirmed interpretations.
+- How P31 consumes design-option comparison summaries.
+- How P32 stores explicit preferences and suggestions.
+- How P33 records furniture layouts and occupancy-related information.
+- How P34 represents accessibility constraints relevant to circulation, clearances, door operation, and room use.
+- How P35 exposes material candidates, material-data provenance, climate context, compatibility results, and existing material selections.
+- How snapshots, checkpoints, rollback, fingerprints, and stale-data detection are implemented.
+- How the existing verification runner registers feature tests and reports results.
+
+Inspect actual exports, schemas, function signatures, and current calling patterns. Do not infer a data contract from a filename or invent a property that is not present.
+
+Create a small implementation plan and file-change inventory before editing. Then proceed with implementation without waiting for additional confirmation.
+
+If a required upstream field does not exist, preserve uncertainty and provide an appropriate incomplete-data workflow instead of modifying the upstream module to manufacture it.
+
+# 4. FEATURE ARCHITECTURE
+
+Follow the existing project conventions. Introduce a dedicated P36 type/service/workspace structure where consistent with the codebase.
+
+Possible responsibilities, adapted to existing conventions, include:
+
+- P36 data types and validation.
+- Acoustic calculation and screening services.
+- Acoustic material and assembly evaluation.
+- Recommendation and explanation generation.
+- Workspace UI and visual summaries.
+- Snapshot/apply/rollback integration.
+- Focused tests and documentation.
+
+Prefer small, typed, testable functions over placing all calculation logic inside a large React component.
+
+Keep the acoustic calculation service independent from presentation wherever practical.
+
+Use deterministic calculations for the same inputs and same calculation version. Avoid random outputs, opaque scoring, unsupported AI-generated measurements, and hidden automatic mutations.
+
+Do not introduce a large new dependency merely to perform elementary geometry or arithmetic. If a specialised acoustic simulation library is genuinely required, evaluate its compatibility and licence, explain the decision, and retain a clear fallback when it cannot be used.
+
+# 5. ACOUSTIC DATA MODEL
+
+Design a versioned, project-scoped acoustic assessment model compatible with existing Plotify types.
+
+The exact schema must reflect the actual codebase. The following is the minimum logical model, not permission to invent conflicting duplicate project structures.
+
+## 5.1 Assessment identity and lifecycle
+
+Support fields or equivalent concepts for:
+
+- Schema version.
+- Assessment ID and project ID.
+- Creation and last-update timestamps.
+- Assessment name.
+- Selected room or room identifier.
+- Calculation-model version.
+- Input fingerprint.
+- Input-data completeness.
+- Result freshness.
+- Assessment status.
+- Active configuration and reversible proposed changes.
+
+Use the project's existing identifiers and persistence conventions.
+
+Do not put persistent project-specific records in component-only state if the application normally stores project data persistently.
+
+## 5.2 Room geometry
+
+Consume available room geometry, including where present:
+
+- Length, width, and height.
+- Floor area and room volume.
+- Shape or polygon geometry.
+- Boundary surface areas.
+- Ceiling and floor areas.
+- Openings, doors, windows, and connecting spaces.
+- Adjacent rooms and shared boundaries.
+- Furniture footprints and arrangement.
+
+Derive area or volume only when the geometry and units are adequate.
+
+For an ordinary rectangular room, volume can be calculated from length × width × height. Irregular rooms require a supported geometric method; do not silently apply rectangular-room assumptions to arbitrary polygons.
+
+Validate positive dimensions and finite numeric values. A coordinate of zero may be valid and must not be rejected simply because it is zero.
+
+Clearly disclose missing ceiling heights, uncertain room boundaries, openings, and incomplete geometry.
+
+If room volume is unavailable or unreliable, do not generate a confident reverberation-time estimate.
+
+## 5.3 Acoustic surfaces and assemblies
+
+Represent acoustic properties only when available and relevant.
+
+Potential fields include:
+
+- Surface type and area.
+- Material or assembly identifier.
+- Acoustic absorption data.
+- Absorption-data frequency bands.
+- Sound insulation test data.
+- Surface and assembly construction details.
+- Data provenance.
+- Source reference and data version.
+- Measurement or test conditions.
+- Applicable frequency range.
+- Confidence and completeness state.
+
+For absorption calculations, support octave-band or one-third-octave-band data where actual source data is available. Never fabricate frequency-dependent coefficients from a material name.
+
+If the material has no documented acoustic data, represent the property as unknown or unavailable. Do not substitute a fabricated value or silently treat the surface as perfectly reflective or perfectly absorptive.
+
+# 6. EVIDENCE, PROVENANCE, AND CONFIDENCE
+
+Every important calculated result must be traceable to its inputs.
+
+Use the project's existing evidence and provenance conventions if suitable. Otherwise create an explicit P36 provenance model that clearly distinguishes:
+
+- Measured on site.
+- Manufacturer or laboratory test data.
+- Traceable generic reference data.
+- User-entered data.
+- Illustrative assumptions.
+- Unavailable or requiring verification.
+
+For every important value, preserve applicable metadata such as units, reference, source date or version, test conditions, and limitations.
+
+A material-property value entered by a user must not automatically become verified product evidence.
+
+An illustrative default must never silently become measured reality.
+
+When data is incomplete, show a visible confidence or evidence-completeness state alongside the estimate. Do not use a numerical probability of correctness unless there is a validated statistical method supporting it.
+
+Distinguish at least:
+
+- Sufficient evidence for a preliminary calculation.
+- Incomplete evidence requiring caution.
+- Insufficient evidence to produce a meaningful estimate.
+- Verified measurement or test evidence, when genuinely supplied and traceable.
+
+A visually attractive result must not conceal major missing inputs.
+
+# 7. ACOUSTIC ASSESSMENT DOMAINS
+
+Implement the following separate assessment domains.
+
+## Domain A — Room Reverberation and Sound Absorption
+
+Estimate reverberation behaviour where the room geometry and surface acoustic properties are sufficient.
+
+Where appropriate, implement the Sabine screening equation in SI units:
+
+RT60 ≈ 0.161 × V / A
+
+Where:
+
+- RT60 is the estimated reverberation time in seconds.
+- V is the room volume in cubic metres.
+- A is the equivalent sound-absorption area in square metres of sabins.
+
+For the simple surface-based model:
+
+A = Σ(αᵢ × Sᵢ)
+
+Where:
+
+- αᵢ is the applicable surface absorption coefficient for the frequency band.
+- Sᵢ is the corresponding surface area in square metres.
+
+The coefficient and units must be consistent with the equation.
+
+Requirements:
+
+1. Calculate the estimate independently for each supported frequency band.
+2. Do not fabricate material coefficients.
+3. Avoid double-counting surfaces, openings, furniture, or additional absorption contributions.
+4. Make the frequency band and modelling assumptions visible.
+5. Explain that the basic Sabine model assumes an adequately diffuse acoustic field and has limitations, particularly when absorption is high or distribution is non-uniform.
+6. Where assumptions make the calculation inappropriate, return a qualified estimate or an insufficient-evidence result.
+7. Do not imply that the estimate is equivalent to an ISO-compliant physical measurement.
+8. Clearly distinguish a simplified prediction from measured RT60.
+
+If the current project has no adequate acoustic absorption data, provide an educational or scenario-preview path rather than a false precision score.
+
+## Domain B — Speech, Communication, and Functional Use
+
+Help users understand whether the acoustic design may suit the intended activity.
+
+Possible use profiles include:
+
+- Bedroom or residential living space.
+- Home office or focused work.
+- Meeting room.
+- Classroom or learning space.
+- Healthcare or consultation room.
+- Restaurant or communal dining area.
+- Reception or public circulation.
+- Music or performance space.
+
+Treat these as functional profiles, not automatically as statutory classes.
+
+Use the intended use, room dimensions, surface data, furniture, occupant assumptions, and applicable configured criteria to explain likely issues.
+
+Potential concerns include excessive reverberation, masking noise, poor speech clarity, unsuitable background noise, and conflicting acoustic priorities.
+
+Do not claim to calculate Speech Transmission Index (STI), clarity metrics, intelligibility percentages, or similar advanced outputs without the required validated methods and inputs.
+
+Where data is insufficient, explain what measurement or additional evidence would be needed.
+
+## Domain C — Background and Environmental Noise
+
+Allow supported user-entered noise observations and source descriptions, for example:
+
+- Road traffic.
+- Rail or aircraft noise.
+- External plant or equipment.
+- Internal HVAC equipment.
+- Pumps, fans, or lifts.
+- Neighbouring activities.
+- General indoor activity.
+
+For each source, distinguish a measured sound level from a subjective description or illustrative scenario.
+
+Where available, represent the source, receiver, time period, measurement location, metric, units, and source of the observation.
+
+Do not infer actual external or indoor sound levels from a city name, map pin, climate record, or project title.
+
+Do not claim real-time monitoring or sound-meter functionality unless actual supported hardware or measured data exists.
+
+When the user has no measured source data, show a clearly labelled qualitative screening workflow.
+
+WHO environmental-noise guidance concerns population exposure from specific environmental sources and is not a universal interior-room acoustic specification. Do not directly reuse outdoor exposure recommendations as indoor-room pass/fail limits.
+
+## Domain D — Airborne Sound Insulation and Privacy Screening
+
+Where building-element and assembly data is present, identify potential sound-transfer concerns between neighbouring rooms or between indoor and outdoor environments.
+
+Consider, where supported:
+
+- Partition and floor assembly.
+- Doors and windows.
+- Junctions and flanking paths.
+- Shared walls and connecting spaces.
+- Penetrations or incomplete details.
+- Known tested acoustic performance.
+
+Never assign a tested STC, Rw, or other sound-insulation rating from a generic label such as “brick wall,” “double glazing,” or “acoustic panel.”
+
+Never treat a laboratory rating of one component as proof of complete as-built building performance.
+
+If a preliminary estimate uses a recognised calculation method, identify that method and all required input data. For a simplified screening-only workflow, label it as such and explain what is excluded.
+
+Do not fabricate sound transmission loss across frequency bands.
+
+Flag missing junction details, door seals, flanking transmission information, and installation information as possible limitations rather than claiming the assembly has passed.
+
+## Domain E — Impact, Structure-Borne Sound, and Vibration
+
+Provide a structured screening checklist for possible impact or structure-borne noise, including footsteps, mechanical equipment, vibration paths, and structural connections.
+
+Do not invent impact-sound ratings or vibration levels.
+
+Do not claim to perform a structural vibration analysis merely because a building model exists.
+
+Where the data is insufficient, state what further information, testing, or specialist assessment is required.
+
+## Domain F — Mechanical Services Noise and Vibration
+
+Provide a preliminary coordination and design-review workflow for available HVAC and equipment information.
+
+Where the existing model supports the relevant data, flag potential considerations such as:
+
+- Equipment close to noise-sensitive spaces.
+- Airborne noise pathways through ducts or openings.
+- Potential structure-borne vibration paths.
+- Missing isolation or acoustic-treatment information.
+- Airflow and equipment data that is insufficient to support a conclusion.
+
+Do not run airflow simulation or introduce P37's Natural Ventilation Scenario Analyzer.
+
+Do not claim a mechanical system meets a sound limit without suitable equipment data, operating conditions, measurement data, or an applicable design method.
+
+## Domain G — Acoustic Zoning and Spatial Coordination
+
+Use available room, adjacency, and furniture information to help users identify conflicts between incompatible acoustic activities.
+
+Examples include:
+
+- A noisy communal area directly beside a quiet room.
+- A meeting room beside a space requiring privacy.
+- Equipment locations beside a noise-sensitive zone.
+- Furniture layouts that block an intended acoustic-screening strategy.
+- Potentially problematic opening or circulation relationships.
+
+These should be geometry-aware screening observations, not claims that sound propagation has been fully simulated.
+
+Do not promise decibel reductions from furniture placement or zoning without supported calculations or product-specific evidence.
+
+## Domain H — Actionable Acoustic Improvements
+
+Generate specific, explainable recommendations from the issues detected.
+
+Possible intervention categories:
+
+- Add or adjust sound-absorbing surface treatments.
+- Reconsider ceiling or wall finishes.
+- Review partition or floor assemblies.
+- Review doors, seals, glazing, and junction detailing.
+- Separate incompatible uses.
+- Review equipment location and vibration isolation.
+- Improve the quality of missing material or measurement data.
+- Refer a critical design issue for professional acoustic assessment.
+
+Each recommendation must state:
+
+1. What issue it addresses.
+2. Which input or observation triggered it.
+3. Why the proposed intervention is relevant.
+4. Which conditions must hold for it to work.
+5. What evidence supports the proposal.
+6. What remains unknown.
+7. Whether the expected benefit is qualitative, estimated, or measured.
+8. Whether a change to the architectural design is required.
+9. Any relevant trade-off, including space, appearance, cost, buildability, maintenance, moisture, fire, or accessibility.
+
+Do not promise a precise decibel improvement, price, reduction in reverberation, or compliance outcome unless the underlying data and calculation genuinely support it.
+
+# 8. CRITERIA AND TARGETS
+
+Do not hard-code a universal “ideal RT60,” background-noise limit, sound-insulation rating, or acoustic comfort score for every type of room.
+
+Create a configurable criteria model appropriate to the existing codebase.
+
+A configured criterion should identify, where applicable:
+
+- Room or activity type.
+- Metric.
+- Target or range.
+- Unit.
+- Source or specification.
+- Jurisdiction or project standard.
+- Applicability conditions.
+- Version or date.
+- Whether the criterion is advisory, project-defined, or legally required.
+- Data completeness and verification status.
+
+If the project has no defined target, P36 may provide a clearly labelled reference profile for preliminary exploration. It must not claim code compliance.
+
+Do not present a preset as an adopted local building regulation unless its jurisdictional applicability has been verified.
+
+Keep user-defined project targets separate from reference guidance.
+
+Allow users to see and edit the criteria that control an evaluation, subject to the established project and data-integrity rules.
+
+# 9. CALCULATION ENGINE AND UNIT SAFETY
+
+Implement all calculations through testable service functions.
+
+Requirements:
+
+- Use explicit internal units and typed unit-aware fields.
+- Convert units only at defined boundaries.
+- Reject non-finite values and physically invalid dimensions.
+- Treat missing, null, unknown, and unverified data distinctly.
+- Avoid hidden fallback constants.
+- Avoid duplicate calculations in the UI.
+- Document every formula, its units, assumptions, and exclusions.
+- Keep frequency bands separate when the underlying data requires them.
+- Use stable rounding for display without rounding away meaningful internal precision.
+- Prevent division by zero and invalid arithmetic.
+- Handle empty rooms, zero-area surfaces, incomplete geometry, unusual dimensions, and unrealistic data gracefully.
+- Keep input validation separate from calculation logic.
+- Return structured issues and warnings rather than failing silently.
+- Make results deterministic and version the calculation method.
+
+For energy-based sound-level arithmetic, if that capability is needed and supported by the available inputs, use a mathematically appropriate logarithmic-energy formulation. Never take an ordinary arithmetic average of decibel values when the desired result requires energy averaging.
+
+Do not implement unnecessary decibel arithmetic merely to enlarge the feature.
+
+Every result should identify which inputs materially affect its value.
+
+# 10. EXPLAINABLE RESULTS — NOT AN OPAQUE SCORE
+
+Create a useful results view with separate outputs for:
+
+- Reverberation estimate, where supported.
+- Acoustic evidence coverage.
+- Potential background-noise concerns.
+- Potential airborne sound-insulation concerns.
+- Spatial and functional conflicts.
+- Mechanical noise and vibration screening.
+- Recommended interventions.
+- Missing information that prevents a meaningful conclusion.
+
+A single overall score may be included only if it has a transparent, documented meaning and cannot conceal a critical failure or missing evidence.
+
+Do not allow a high weighted score to override an unmet mandatory requirement, an identified high-priority acoustic risk, or insufficient evidence.
+
+Show the difference between:
+
+- A calculated value.
+- A measurement.
+- A reference target.
+- A user-entered assumption.
+- A preliminary recommendation.
+
+Do not label a candidate “compliant,” “certified,” or “safe” merely because its weighted score is high.
+
+Each material recommendation or assessment finding should be explainable in plain language and traceable to its source inputs.
+
+# 11. P30–P35 INTEGRATION CONTRACT
+
+Reuse actual existing contracts discovered during inspection.
+
+## P30 — AI Design Brief Interpreter
+
+Read relevant confirmed acoustic requirements as mandatory constraints only when the actual P30 data explicitly establishes that status.
+
+Keep inferred, suggested, or unconfirmed requirements separate.
+
+Show conflicting or unresolved requirements instead of silently picking one.
+
+Do not modify the original brief.
+
+## P31 — Multi-Option Design Comparison
+
+Expose a read-only, typed P36 acoustic summary for comparable design alternatives where the actual P31 contract allows it.
+
+Use comparable units, criteria, evidence states, and calculation versions.
+
+If one option has missing acoustic data, expose that limitation instead of presenting an apparently precise but unfair comparison.
+
+Do not rewrite P31 scoring logic or claim P36 changes establish total design superiority.
+
+## P32 — Adaptive Design Personalization
+
+Read relevant explicit user preferences and suggestions according to the actual preference schema.
+
+An explicit preference may inform a recommendation but must not override safety, applicable mandatory requirements, or an evidence limitation.
+
+Unconfirmed suggestions must never be promoted to confirmed user preferences.
+
+Do not modify P32's stored preferences.
+
+## P33 — Furniture & Circulation Intelligence
+
+Consume existing furniture and layout information only where meaningful to a supported calculation or screening rule.
+
+Do not assume that a furniture object's presence proves a known acoustic absorption coefficient.
+
+Do not create acoustic treatment benefits from generic furniture geometry alone.
+
+Preserve P33's geometry, collision, circulation, and rollback behaviour.
+
+## P34 — Universal Accessibility Review
+
+Where relevant, surface possible coordination trade-offs involving accessible circulation, door operation, clearances, and room use.
+
+Do not narrow clear routes or modify accessibility constraints simply to achieve a target acoustic layout.
+
+Do not duplicate P34's accessibility evaluator or claim that an acoustic layout is accessible without the necessary checks.
+
+## P35 — Climate-Responsive Material Advisor
+
+Reuse P35's actual material contracts and provenance information where possible.
+
+An acoustic property must remain a separate property with its own source and evidence. A material's climate suitability does not prove acoustic suitability, and an acoustic property does not prove durability or moisture compatibility.
+
+When suggesting a material change, preserve relevant P35 compatibility warnings. An acoustically useful but moisture-incompatible assembly must not be recommended as an unconditional solution.
+
+Do not rewrite P35's climate rules, material catalogue, embodied-carbon calculations, or existing carbon factors.
+
+All upstream integrations must be read-only unless the user explicitly applies a P36 proposal through the supported project workflow.
+
+# 12. USER EXPERIENCE AND WORKSPACE
+
+Create a coherent P36 workspace consistent with Plotify's existing visual language.
+
+The workspace should guide users through the following workflow:
+
+1. Select a project and room.
+2. Review the available room geometry and its units.
+3. Identify the intended room use and acoustic priorities.
+4. Review available materials, surface data, furniture, openings, and room adjacency.
+5. Add optional measured noise observations or explicitly labelled assumptions.
+6. Review missing information and evidence quality.
+7. Run the supported assessment.
+8. Inspect results, calculation assumptions, limitations, and recommendations.
+9. Preview the proposed design changes.
+10. Apply selected supported changes or dismiss the proposal.
+11. Recalculate or flag outdated results when relevant input data changes.
+12. Export a useful summary if consistent with existing project export patterns.
+
+Provide an empty state for projects without adequate data.
+
+Provide loading, error, no-room-selected, insufficient-evidence, stale-result, and successful-assessment states.
+
+Use clear status labels such as “Estimated,” “Measured,” “Reference,” “Needs review,” and “Insufficient evidence.”
+
+Avoid giant undifferentiated forms. Organize the workspace into clear sections, expandable technical detail, a summary, and practical next actions.
+
+The advanced view should expose enough data for technically informed users to inspect the reasoning. The standard view should explain the meaning without requiring acoustic-engineering expertise.
+
+Keep keyboard navigation, focus indicators, readable contrast, semantic controls, labels, and accessible error messages consistent with the project's accessibility conventions.
+
+Do not add decorative controls that do nothing.
+
+# 13. NON-DESTRUCTIVE PREVIEW, APPLY, AND ROLLBACK
+
+No recommendation may silently mutate the project.
+
+Implement a safe change workflow consistent with existing snapshot and version services.
+
+The workflow must:
+
+1. Generate a proposal from the current project state.
+2. Show a clear before-and-after diff.
+3. Identify affected fields and objects.
+4. Preserve unaffected data.
+5. Validate the proposed state.
+6. Detect whether the underlying project or relevant inputs changed since the preview.
+7. Require an intentional user action before applying.
+8. Create the required checkpoint or snapshot before mutation.
+9. Apply the supported mutation atomically.
+10. Restore the prior state if an application step fails.
+11. Support rollback using the existing project conventions.
+12. Invalidate or mark stale affected calculations.
+13. Report failure honestly if a snapshot, apply, or rollback cannot be completed.
+
+Use the existing snapshot/version service instead of inventing a conflicting parallel history system.
+
+Never claim rollback is available unless the implementation is connected to a working restoration path.
+
+Use a deterministic fingerprint over the relevant acoustic inputs and applicable source versions. Avoid relying on object-reference equality.
+
+If the project changes after a preview is generated, do not blindly apply the old proposal.
+
+# 14. PERSISTENCE AND DATA INTEGRITY
+
+Persist P36 using the existing project persistence conventions.
+
+If the codebase uses an optional project-scoped feature property, follow that pattern rather than introducing an unrelated global store.
+
+Ensure:
+
+- Reloading preserves supported assessments.
+- New projects begin with a valid empty or unconfigured assessment state.
+- Existing projects without P36 data still load.
+- Older project records receive a safe migration or default.
+- Optional fields do not break existing imports, exports, or project rendering.
+- Assessment records remain associated with the correct project and room.
+- A stale input fingerprint cannot be treated as a current result.
+- Malformed saved data is handled without destroying unrelated project information.
+- Snapshot and restoration logic preserve existing upstream module data.
+- Large histories or repeated outputs do not cause unbounded persistent growth.
+
+Do not duplicate the full upstream P30–P35 objects inside P36 when stable references or calculated summaries are sufficient.
+
+Do not overwrite user-entered material data with an acoustic default.
+
+# 15. PERFORMANCE AND REACTIVITY
+
+Avoid expensive recalculation on every keystroke when a calculation depends on several inputs.
+
+Use the performance conventions already present in the project.
+
+Where appropriate:
+
+- Separate editable form state from committed assessment inputs.
+- Debounce only where it improves user experience without delaying required validation.
+- Cache calculations only when the cache keys include all material inputs and relevant method/data versions.
+- Invalidate cached results when any relevant geometry, surface, material, criterion, or room-use input changes.
+- Avoid repeated full-project scans inside nested render loops.
+- Clean up subscriptions and effects.
+- Avoid unnecessary dependencies.
+- Do not block the main UI during large calculations.
+
+For the first implementation, prefer a transparent deterministic engine for the supported scope instead of introducing complex real-time acoustic simulation that the existing application cannot credibly support.
+
+# 16. SECURITY AND PRIVACY
+
+Treat user-entered measurements, notes, material references, and imported assessment data as untrusted input.
+
+Validate input sizes, data shapes, numeric ranges, and supported formats according to existing application conventions.
+
+Do not add microphone access, continuous recording, or background audio capture.
+
+Do not upload room observations or project data to an external service unless the current architecture already has a clearly documented and authorised workflow for that purpose. Do not create a new external-data flow simply to complete P36.
+
+If a future workflow imports measured results, keep source attribution and data handling explicit.
+
+Avoid exposing sensitive project notes through logs or error messages.
+
+# 17. TECHNICAL REFERENCES AND RESEARCH RULES
+
+Verify the relevant official sources and the status of any standard at implementation time. Do not invent clauses, thresholds, editions, or compliance claims.
+
+Use this research hierarchy:
+
+1. Official standards organisations and their scope/status pages.
+2. Authoritative technical handbooks, such as ASHRAE's sound-and-vibration guidance.
+3. Recognised scientific or government publications.
+4. Traceable manufacturer laboratory test data for specific products.
+5. Clearly labelled generic or illustrative reference data only when primary evidence is unavailable.
+
+Useful starting references:
+
+- ISO 3382-2:2008 — measurement of reverberation time in ordinary rooms: https://www.iso.org/standard/36201.html
+- ISO 12354-1:2017 — estimation of airborne sound insulation between rooms: https://www.iso.org/standard/70242.html
+- ISO 717-1:2020 — airborne sound-insulation ratings: https://committee.iso.org/cms/live/live/en/sites/isoorg/contents/data/standard/07/74/77435.html
+- ASHRAE Handbook — Fundamentals, Chapter 8, Sound and Vibration: https://handbook.ashrae.org/Handbooks/F25/IP/F25_Ch08/F25_Ch08_ip.aspx
+- WHO Environmental Noise Guidelines for the European Region: https://www.who.int/publications/i/item/9789289053563
+
+These sources have different purposes. Do not treat a measurement standard as a complete design specification, a rating standard as proof of as-built performance, or outdoor health guidance as an indoor-room pass/fail requirement.
+
+Check the latest publication and revision status before describing a standard as current. If a standard is under revision, clearly distinguish the published edition from a draft or proposed replacement.
+
+Do not reproduce copyrighted standard text. Implement original code and concise, traceable summaries based on permitted source material.
+
+Store source metadata in an auditable way where relevant, including the publisher, title, edition or year, URL or identifier, access/review date, relevant applicability, and any licence constraints.
+
+Do not mark a property “verified” merely because a source name has been added to a record.
+
+# 18. TESTING REQUIREMENTS
+
+Inspect the actual test runner and existing test conventions. Add a dedicated P36 suite and register it using the established mechanism.
+
+Include focused unit tests for:
+
+### Geometry and units
+- Valid rectangular-room volume.
+- Missing or invalid dimensions.
+- Non-finite and negative input rejection.
+- Unit conversion, where supported.
+- Irregular or unsupported geometry handling.
+- Correct surface-area accounting.
+
+### Reverberation calculations
+- Known test fixtures with manually verified expected results.
+- Correct SI units and formula implementation.
+- Frequency-band independence.
+- Missing absorption coefficients.
+- Zero or invalid total absorption.
+- High-absorption or other cases where the simplified model is inappropriate.
+- Stable rounding and deterministic results.
+- Clear separation between estimated and measured values.
+
+### Evidence integrity
+- Unconfigured project.
+- User-entered values remaining user-entered.
+- Illustrative assumptions not becoming verified evidence.
+- Invalid or missing source references.
+- Incomplete data producing an appropriate warning or insufficient-evidence result.
+- Stale evidence versions invalidating relevant conclusions.
+
+### Acoustic screening
+- Each supported assessment domain.
+- Missing room adjacency or assembly data.
+- Unknown sound-insulation ratings.
+- Unsupported STI or advanced simulation requests not producing fabricated results.
+- Project-defined criteria versus reference profiles.
+- Contradictory criteria and unconfirmed requirements.
+
+### P30–P35 compatibility
+- Confirmed P30 constraints remain distinct from assumptions.
+- P31 receives only valid, comparable summaries.
+- P32 explicit preferences remain distinct from suggestions.
+- P33 geometry is not mutated by assessment.
+- P34 accessibility-related constraints are preserved.
+- P35 material provenance and climate compatibility warnings remain intact.
+- Missing optional upstream modules do not crash P36.
+
+### State and persistence
+- Assessment survives save and reload.
+- New project safe defaults.
+- Legacy project compatibility.
+- Preview does not mutate the project.
+- Successful atomic apply.
+- Failed apply restores the prior state.
+- Rollback restores the intended supported changes.
+- Changed project inputs make prior previews or results stale.
+- Fingerprints remain deterministic.
+- Unrelated project and upstream data is preserved.
+
+### User interface
+- No room selected.
+- Unconfigured assessment.
+- Incomplete evidence.
+- Invalid input.
+- Assessment errors.
+- Stale result.
+- Preview, apply, dismiss, and rollback flows.
+- Accessible labels and keyboard interaction where the test environment supports them.
+
+Use realistic fixtures, not tests that simply assert the returned object exists.
+
+For each key calculation, independently derive expected values and test tolerances explicitly.
+
+Do not weaken or delete existing tests to make P36 pass.
+
+# 19. REGRESSION AND RELEASE VERIFICATION
+
+Before concluding:
+
+1. Run the focused P36 test suite.
+2. Run the full existing verification runner.
+3. Run the project's actual lint or type-check command, if provided.
+4. Run the production build using the actual supported project command.
+5. Inspect the final diff for accidental edits to upstream features.
+6. Check that all P30–P35 functionality remains compatible.
+7. Check project persistence and restored state in the available test environment.
+8. Confirm the P36 workspace is reachable through the existing navigation and works on valid projects.
+9. Confirm no P37–P40 scope has been implemented.
+10. Confirm no other account, GitHub repository, or external integration was modified.
+
+If the runtime supports only a limited subset of tests, describe precisely what was run and what could not be tested.
+
+Do not report a full-system pass just because the build succeeds.
+
+Do not silently change verification-suite counts or suppress failures. If the verification runner has a pre-existing counting or reporting defect, describe it and avoid making unrelated changes unless a minimal correction is necessary for reliable P36 registration.
+
+# 20. DOCUMENTATION
+
+Add concise project documentation consistent with existing conventions, covering:
+
+- Purpose and scope.
+- Supported acoustic calculations and screening rules.
+- Formula definitions and units.
+- Input data requirements.
+- Evidence and provenance states.
+- Data sources and limitations.
+- Supported and unsupported room conditions.
+- Interpretation of estimates and warnings.
+- P30–P35 integration contracts.
+- Persistence, stale-result detection, preview, apply, and rollback.
+- Test commands actually executed.
+- Known limitations and future work explicitly deferred to P37–P40.
+
+Do not describe a planned or mocked feature as implemented.
+
+# 21. REQUIRED ACCEPTANCE CRITERIA
+
+P36 is implementation-ready for checkpoint review only when all applicable criteria below have been met.
+
+**Core function**
+- A dedicated P36 workspace exists and is connected using the existing application conventions.
+- Supported room geometry and acoustic evidence produce deterministic, explainable results.
+- The reverberation calculation uses correct units and appropriately disclosed assumptions.
+- The module distinguishes measured data, calculated estimates, reference guidance, and assumptions.
+- Recommendations are connected to identifiable issues and input evidence.
+
+**Evidence integrity**
+- Missing data does not silently become verified data.
+- Unsupported ratings or advanced acoustic metrics are not fabricated.
+- Criteria are traceable and are not falsely presented as universal statutory requirements.
+- Confidence and data completeness are visible to the user.
+
+**Integration**
+- Actual P30–P35 contracts are used correctly.
+- Existing upstream data is preserved.
+- The feature does not reimplement P35 material suitability or overwrite other engines.
+- P37–P40 remain outside scope.
+
+**Safe state management**
+- Assessments persist correctly.
+- Preview is non-destructive.
+- Apply is validated and checkpointed before mutation.
+- Failure and rollback paths are handled honestly.
+- Stale inputs invalidate relevant results.
+
+**Quality**
+- Focused tests pass.
+- The full verification runner is executed and its actual results reported.
+- Lint/type checking and production build results are reported accurately.
+- No unrelated regressions or scope expansions are introduced.
+- Documentation matches actual behaviour.
+
+If any criterion is not met, report it as incomplete rather than claiming full acceptance.
+
+# 22. FINAL IMPLEMENTATION REPORT — REQUIRED FORMAT
+
+After implementation, provide a factual report with these sections:
+
+1. **Implementation summary** — what genuinely works.
+2. **Files created and modified** — exact paths and purpose.
+3. **Architecture** — actual P36 types, services, components, and state flow.
+4. **Acoustic calculations** — equations, units, assumptions, and exclusions.
+5. **Evidence and provenance** — actual source metadata and confidence behaviour.
+6. **P30–P35 integration** — what was read, what was reused, and what remained untouched.
+7. **Persistence and rollback** — actual implementation and verified failure behaviour.
+8. **Tests** — actual commands, focused results, full-system results, and any skipped tests.
+9. **Build and quality checks** — exact commands and outcomes.
+10. **Known limitations** — missing data, unimplemented scenarios, and unverified claims.
+11. **Scope and regression confirmation** — disclose any upstream modifications and confirm P37–P40 remained outside scope.
+12. **Acceptance criteria** — mark each as passed, failed, or not tested, with evidence.
+
+Include real test counts and concise representative output. Do not invent screenshots, test results, measurements, source verification, or runtime behaviour.
+
+Distinguish clearly between implemented, unit-tested, full-suite-tested, manually inspected, physically measured, and independently verified.
+
+Do not label P36 “Grand Audit passed,” “production certified,” “scientifically validated,” or “fully approved” merely because implementation tests and a build pass.
+
+# 23. FINAL EXECUTION INSTRUCTION
+
+Start by inspecting the current Account A codebase and writing the internal implementation plan.
+
+Then implement P36 end-to-end within the existing architecture, validate it, run the available verification commands, inspect the resulting changes, and deliver the required report in this same task.
+
+Preserve existing working behaviour. Prefer correctness, traceability, and practical usefulness over feature count.
+
+Do not wait for additional approval to implement this scoped feature. Do not make unrelated infrastructure changes, connect accounts, modify GitHub, or begin the dedicated cross-feature Grand Audit.
+
+**The goal is not to make Plotify sound more scientific. The goal is to make its acoustic recommendations more useful, more transparent, and more defensible.**

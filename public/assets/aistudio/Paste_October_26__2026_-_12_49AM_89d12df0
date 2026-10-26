@@ -1,0 +1,534 @@
+# PLOTIFY — PROMPT 33
+## FURNITURE & CIRCULATION INTELLIGENCE
+**Account A | Locked Roadmap: P33 of P30–P40**
+
+### 1. MISSION
+
+Implement P33 — Furniture & Circulation Intelligence in the existing Plotify Account A codebase.
+
+The objective is to help users understand whether furniture can be placed meaningfully within their existing room geometry and how furniture arrangements affect usable space, movement paths, door operation, and functional room layouts.
+
+P33 should evolve Plotify beyond a basic floor-plan editor by providing practical, measurable furniture-layout intelligence.
+
+The feature should support the following capabilities where the actual project model contains sufficient data:
+
+- A reusable, user-editable furniture catalog.
+- Furniture placement, movement, rotation, resizing where appropriate, and removal.
+- Furniture footprint visualization within existing rooms.
+- Detection of furniture-to-furniture overlaps.
+- Detection of furniture extending beyond room boundaries.
+- Assessment of user-configurable circulation clearances.
+- Detection of potential obstructions near known doorways and door-swing zones.
+- Analysis of movement routes between user-selected room access points.
+- Clear explanations of layout conflicts and possible adjustments.
+- Optional layout suggestions based on confirmed P30 requirements and explicit P32 preferences.
+- Before-and-after previews of proposed furniture arrangements.
+- Safe saving, updating, and rollback of furniture-layout changes.
+
+**Core principle: distinguish geometric facts from configurable design heuristics. A layout that passes P33 checks must not automatically be described as accessible, code-compliant, or universally safe.**
+
+### 2. NON-NEGOTIABLE SCOPE LOCK
+
+1. Implement P33 only.
+2. Preserve the locked Account A roadmap from P30 through P40.
+3. Do not implement P34 Universal Accessibility Review or any later roadmap feature.
+4. Do not rewrite or replace P30 AI Design Brief Interpreter, P31 Multi-Option Design Comparison, or P32 Adaptive Design Personalization.
+5. Do not assume that prior implementation reports prove a particular interface still exists; inspect the actual code before using it.
+6. Do not assume Account B's P41–P50 modules exist in this workspace.
+7. Do not connect to GitHub, push commits, merge branches, or perform cross-account integration.
+8. Do not silently modify room dimensions, walls, doors, windows, floors, or saved designs when furniture is added or moved.
+9. Do not invent door locations, swing directions, windows, room dimensions, furniture dimensions, or accessibility compliance.
+10. Do not silently guess units or convert incompatible measurements.
+11. Do not describe generic furniture templates as manufacturer-verified products unless reliable product data is actually available.
+12. Do not introduce unnecessary external dependencies or duplicate existing project models, geometry utilities, state-management systems, or storage services.
+13. Do not claim an operation or test succeeded unless it actually succeeded.
+14. Preserve all unrelated project information and existing functionality.
+
+### 3. INSPECT THE REAL CODEBASE BEFORE IMPLEMENTING
+
+Before modifying files, inspect the actual repository and document the findings relevant to P33.
+
+Inspect:
+
+**Project and room geometry**
+- The actual Project type and its room, floor, storey, unit, and coordinate fields.
+- The room geometry representation, including positions, widths, lengths, floor levels, and supported shape limitations.
+- Existing geometry utilities for containment, intersections, collision detection, and validation.
+- Existing plot boundaries, walls, doors, windows, openings, and other elements that may constrain furniture placement.
+- How the application identifies individual rooms and their stable IDs.
+
+**Rendering and interaction**
+- Existing 2D floor-plan canvas and editor interactions.
+- Existing 3D scene, Three.js components, and rendering lifecycle, if present.
+- Existing selection, dragging, rotation, snapping, resizing, keyboard, and pointer-interaction patterns.
+- Current coordinate-transform and zoom behaviour.
+- Existing UI conventions for warnings, selection, property editing, and previews.
+
+**Existing P30–P32 functionality**
+- P30 confirmed room requirements, room categories, unresolved conflicts, and reviewed assumptions.
+- P31 option and comparison services, if present.
+- P32 project-scoped preferences, review states, and preference priorities, if present.
+- The actual interfaces through which these modules exchange data.
+
+**Data integrity and verification**
+- Existing project persistence and storage limits.
+- Versioning, snapshot, checkpoint, and rollback services.
+- Existing project-update and validation patterns.
+- Test scripts and the actual system verification runner.
+- TypeScript/lint commands and production-build process.
+- Existing furniture or interior-design models, templates, services, or components.
+
+Do not assume that a furniture model or relevant door/window geometry exists merely because the UI displays a floor plan.
+
+After inspection, record the available capabilities, missing geometry, planned file changes, and implementation risks. Then continue with the achievable implementation rather than stopping at an audit report, unless a real blocker makes implementation unsafe.
+
+Prefer small, additive changes that use existing architecture.
+
+### 4. FURNITURE DATA MODEL AND CATALOG
+
+Create a maintainable furniture model only after inspecting the current codebase.
+
+If the application has no suitable model, introduce typed contracts for concepts such as:
+
+- Furniture item ID.
+- Furniture catalog/template ID.
+- Furniture category.
+- Display name.
+- Width, depth, and height where applicable.
+- Measurement unit or normalized internal unit convention.
+- 2D footprint shape supported by the current renderer.
+- Position and rotation.
+- Associated project, room, and floor identifiers.
+- Optional clearance preferences.
+- Source and dimension provenance.
+- User edits and validation status.
+- Optional 3D model or rendering metadata, if actually supported.
+
+The implementation must satisfy the following requirements:
+
+1. Use stable identifiers rather than array indices or display labels.
+2. Keep catalog templates separate from placed furniture instances.
+3. Preserve the original template when a user edits a placed instance.
+4. Validate all dimensions and coordinates.
+5. Handle legacy projects with no furniture data.
+6. Avoid duplicate project models and unnecessary schema changes.
+7. Add only the minimum optional, backward-compatible metadata genuinely needed.
+8. Keep furniture placement records separate from room geometry.
+9. Preserve project IDs, room IDs, floor IDs, and unrelated metadata.
+10. Define how furniture dimensions are represented internally and converted for display.
+
+Do not copy complete catalog objects into project state when references plus necessary instance overrides would be more appropriate.
+
+### 5. STARTER FURNITURE CATALOG
+
+Provide a practical starter catalog using editable, clearly labelled furniture templates where appropriate.
+
+Potential categories include:
+
+- Beds and bedside furniture.
+- Sofas, armchairs, and living-room tables.
+- Dining tables and chairs.
+- Desks and office chairs.
+- Storage units, wardrobes, and cabinets.
+- Kitchen units, if supported by the existing room model.
+- Bathroom fixtures, if supported.
+- Other basic furniture primitives that fit the existing application's scope.
+
+For each template:
+
+- Provide explicit dimensions.
+- Explain that dimensions may be illustrative defaults unless verified against a source.
+- Allow users to inspect and edit dimensions where appropriate.
+- Support only footprint shapes the geometry engine can validate reliably.
+- Keep the catalog maintainable and easy to extend.
+- Do not claim that generic templates represent all real furniture products.
+
+If the current renderer supports only rectangular furniture footprints, implement reliable rectangular footprints before introducing complex curved or irregular geometry.
+
+Do not fetch or fabricate manufacturer catalogues as part of this prompt. External product integrations remain out of scope unless a genuine existing capability is already available and appropriate.
+
+### 6. FURNITURE PLACEMENT AND EDITING
+
+Build a guided placement and editing workflow.
+
+Users should be able to:
+
+1. Choose a furniture template.
+2. Select a supported room and floor.
+3. Preview the item before placement.
+4. Place it inside the room.
+5. Move and rotate it.
+6. Edit supported dimensions.
+7. Duplicate or remove an instance.
+8. Undo or cancel an uncommitted edit where the existing editor architecture supports it.
+9. Review validation warnings.
+10. Save the layout without modifying unrelated room or building geometry.
+
+Implement clear selection and placement states.
+
+Use the application's existing snapping, coordinate transforms, interaction patterns, and validation services where they are suitable.
+
+If snapping is supported, keep it predictable and configurable where necessary. Do not snap an item through a wall or automatically distort its dimensions to make it fit.
+
+For each proposed placement, compute a preview of the resulting footprint and warnings before committing the operation.
+
+Prevent invalid or cancelled edits from leaving partially updated project state.
+
+### 7. GEOMETRIC VALIDATION ENGINE
+
+Implement deterministic and independently testable geometry-validation functions.
+
+Where the existing geometry model supports them, detect:
+
+**A. Furniture collisions**
+- Furniture instances whose footprints overlap.
+- Furniture overlapping a known fixed object.
+- Furniture intersecting a known wall or opening.
+- Duplicate or invalid placement records.
+
+**B. Room containment**
+- Furniture footprints extending beyond the room boundary.
+- Furniture placed against an unsupported or missing room.
+- Invalid positions, non-finite coordinates, zero-sized footprints, or negative dimensions.
+
+**C. Door and opening conflicts**
+- Furniture intersecting a door opening when the door geometry is available.
+- Furniture intersecting the represented door-swing region when the swing geometry and direction are known.
+- Potential obstruction of a known doorway or access point.
+
+Do not fabricate door swing arcs, opening widths, hinge positions, or window locations when those details are not present.
+
+**D. Fixed-object conflicts**
+- Intersections with known columns, structural elements, or other applicable fixed objects.
+- Conflicts with existing protected or reserved floor-plan areas, where those areas are explicitly represented in the current model.
+
+**E. Multi-floor handling**
+- Furniture must belong to a valid room and storey.
+- Room/floor assignments must remain consistent.
+- Do not allow furniture placed on one floor to affect geometry on another floor unless a valid explicit cross-floor relationship exists.
+
+Return structured diagnostics that identify:
+- The affected furniture and room IDs.
+- The relevant conflict category.
+- The calculation or geometric test used.
+- The severity or status.
+- A human-readable explanation.
+- Whether the check is based on complete data or has missing inputs.
+
+Avoid a single generic "invalid layout" result when the actual problem can be identified.
+
+### 8. CIRCULATION AND CLEARANCE ANALYSIS
+
+Create a deterministic circulation-analysis layer that assesses supported spaces around placed furniture.
+
+The purpose is to identify potential movement restrictions and help users improve the layout.
+
+Potential analysis includes:
+
+- Remaining free floor regions.
+- Clearance between furniture items.
+- Clearances along user-selected paths.
+- Narrow or blocked passages.
+- Potential route obstruction between explicitly identified access points.
+- Changes in circulation space after furniture is added or moved.
+
+Requirements:
+
+1. Make clearance thresholds explicit and user-configurable where appropriate.
+2. Record which threshold was used for each assessment.
+3. Use consistent measurement units.
+4. Distinguish a geometric measurement from a recommended threshold.
+5. Explain which furniture or boundary causes the obstruction.
+6. Show missing data when relevant doors, room boundaries, openings, or access points are absent.
+7. Avoid treating straight-line distance as proof of a traversable route.
+8. Do not declare a route passable merely because no direct furniture collision was detected.
+9. Support only routing methods that can be tested against known room boundaries and furniture obstacles.
+10. Use a documented, deterministic geometry or grid method where appropriate.
+11. Make approximation limits clear.
+12. Avoid pretending that an estimated circulation route is a construction-verified walking path.
+
+If a reliable route cannot be computed from the available room geometry, report the limitation rather than inventing one.
+
+### 9. CLEARANCE STATUS AND P34 BOUNDARY
+
+P33 is not the Universal Accessibility Review feature.
+
+P33 may support configurable geometric clearances and report whether a selected layout meets the user-specified values. It must not claim to provide a full accessibility audit.
+
+In particular:
+
+- Do not implement P34's full step-free accessibility analysis.
+- Do not claim universal compliance from generic corridor-width checks.
+- Do not assert that wheelchair turning circles, accessible routes, or legal dimensional standards pass unless a future or existing validated feature explicitly supports that assessment.
+- Do not invent jurisdiction-specific statutory dimensions.
+- Do not label furniture arrangements "legally compliant" or "universally accessible" based only on generic geometry.
+- Make it clear when a threshold is user-defined, illustrative, or taken from an explicitly documented applicable rule source.
+
+If an access-related measurement is displayed, identify its source and limits.
+
+Keep P33's diagnostics useful for ordinary room planning while preserving the full accessibility review for P34.
+
+### 10. CIRCULATION VISUALIZATION
+
+Use the existing floor-plan workspace to make the analysis understandable.
+
+Where supported, visualize:
+
+- Furniture footprints.
+- Selected furniture dimensions and orientation.
+- Collision regions.
+- Furniture-to-wall conflicts.
+- Door-swing conflicts based on actual known door geometry.
+- User-configured clearance zones.
+- Available and blocked route segments.
+- Uncertain or unassessed regions.
+- Warnings attached to the relevant furniture or room.
+
+Do not rely on colour alone to communicate status. Use labels, symbols, descriptions, or accessible status text.
+
+Keep validation and visualization results synchronized with the actual project data. When an item moves, rotates, changes dimensions, or is removed, recalculate the affected diagnostics and prevent stale results from replacing newer ones.
+
+If a 3D furniture representation is supported, keep its footprint and dimensions consistent with the validated 2D geometry.
+
+A decorative 3D model that does not match the validated footprint must not be presented as accurate geometric evidence.
+
+### 11. LAYOUT IMPROVEMENT SUGGESTIONS
+
+Provide explainable suggestions where the data supports them.
+
+Examples include:
+- Move an item away from a detected collision.
+- Rotate furniture to improve remaining clearance.
+- Try an alternative location within the same room.
+- Change a furniture item's dimensions when the user allows edits.
+- Compare two supported arrangements.
+- Identify a furniture item that blocks a selected route.
+
+Suggestions must:
+- Identify the relevant conflict or user preference.
+- Explain why the proposed change may help.
+- Distinguish computed geometric results from heuristics.
+- Respect the user's protected design constraints.
+- Be previewed before application.
+- Never silently move or remove saved furniture.
+- Avoid making multiple unrelated changes without explicit user review.
+
+Do not generate arbitrary placements by repeatedly moving furniture until warnings disappear.
+
+If automated placement suggestions are implemented, keep the search bounded and deterministic where practical. Handle failure to find a valid arrangement without freezing the UI or claiming that the room has no possible solution unless that conclusion has been established.
+
+### 12. P30, P31, AND P32 COMPATIBILITY
+
+Use actual inspected interfaces from the current Account A repository.
+
+**P30 — AI Design Brief Interpreter**
+
+Where supported, read confirmed room requirements and relevant room categories.
+
+- Prioritize confirmed user requirements.
+- Treat unconfirmed assumptions as suggestions, not binding facts.
+- Surface unresolved requirement conflicts.
+- Do not silently change the brief.
+- Avoid claiming a room layout satisfies the complete brief if relevant information is missing.
+
+**P31 — Multi-Option Design Comparison**
+
+Where supported, expose furniture-layout metrics through a clean interface that can be consumed by future comparisons.
+
+- Do not modify P31's existing calculation logic unnecessarily.
+- Keep P33 diagnostics distinct from P31's existing geometry-conflict definitions.
+- Document any new metrics and how they should be compared.
+- Avoid changing P31's criteria or scores silently.
+- Preserve the existing comparison workflow.
+
+Do not implement P31 again inside P33.
+
+**P32 — Adaptive Design Personalization**
+
+Where supported, use explicit project preferences to inform optional layout suggestions.
+
+Potential preferences include privacy, usable living area, storage, room priorities, and other confirmed values that genuinely map to furniture or circulation decisions.
+
+- Never treat unconfirmed inferred preferences as user-approved instructions.
+- A higher preference score must not override a hard constraint.
+- Explain which preference influenced a suggestion.
+- Do not silently rewrite the preference profile.
+- Do not claim a furniture arrangement optimizes an unimplemented P32 preference.
+
+If an upstream module is absent or incompatible, provide the safe functionality available in P33 and document the integration limitation. Do not secretly implement the missing upstream feature.
+
+### 13. FUTURE ROADMAP BOUNDARIES: P34–P40
+
+Keep P33 limited to furniture and circulation intelligence.
+
+- **P34 Universal Accessibility Review:** Full accessibility assessment belongs to P34.
+- **P35 Climate-Responsive Material Advisor:** Do not build P35's material intelligence.
+- **P36 Acoustic Comfort Planner:** Do not implement an acoustic simulation engine.
+- **P37 Natural Ventilation Scenario Analyzer:** Do not implement ventilation simulation.
+- **P38 Daylight & Visual Comfort Analyzer:** Do not implement daylight simulation.
+- **P39 Design Rationale & Decision History:** P33 may explain its own diagnostics but must not build the complete decision-history system.
+- **P40 Design Quality Benchmark & Improvement Loop:** P33 must not introduce a universal design-quality scoring engine.
+
+Document useful extension points without implementing future roadmap features prematurely.
+
+### 14. DATA PERSISTENCE, VERSIONING, AND ROLLBACK
+
+Inspect the current storage and versioning implementation before changing project data.
+
+If a new furniture-layout field is needed, add an optional, backward-compatible extension to the actual project model.
+
+Requirements:
+
+1. Preserve existing room geometry and storey definitions.
+2. Keep furniture data separate from primary room geometry unless the existing model has a justified alternative.
+3. Use stable furniture, room, and project identifiers.
+4. Validate project/furniture references before saving.
+5. Keep old projects without furniture data valid.
+6. Use existing persistence mechanisms rather than adding a second storage system.
+7. Check current storage constraints before persisting large geometry or model assets.
+8. Use the existing snapshot/checkpoint mechanism before significant saved-layout changes when appropriate.
+9. Support restoration of prior saved furniture state where the versioning system permits it.
+10. Ensure failed or cancelled operations do not leave partially applied project data.
+11. Preserve brief, budget, site context, structural data, regulations, MEP information, alternatives, scenarios, and existing project metadata.
+12. Never report a successful save before persistence is confirmed.
+
+### 15. PERFORMANCE, ACCESSIBILITY, AND ERROR HANDLING
+
+- Keep geometry calculations deterministic and testable.
+- Avoid recalculating the entire project unnecessarily after every small pointer movement.
+- Reuse suitable memoization and state-update patterns.
+- Prevent stale asynchronous results from overwriting newer layout analyses.
+- Apply reasonable limits to furniture instance counts and expensive routing calculations.
+- Avoid blocking the main UI with unbounded placement or route-search loops.
+- Provide meaningful progress and cancellation where processing warrants it.
+- Handle corrupt, stale, or incomplete project records gracefully.
+- Ensure keyboard-accessible placement and editing alternatives where feasible.
+- Provide visible focus, descriptive controls, and accessible warnings.
+- Do not rely on colour alone for collision, clearance, and route status.
+- Preserve existing canvas navigation and avoid breaking unrelated floor-plan interactions.
+
+If an interaction cannot be made accessible using the current rendering structure, document the limitation and provide an appropriate alternative control.
+
+### 16. TESTING AND REGRESSION
+
+Create a dedicated P33 test suite using the repository's existing conventions and register it in the actual verification runner.
+
+**A. Furniture model and persistence**
+- Catalog templates have valid identifiers and dimensions.
+- New furniture instances are independent from their templates.
+- Invalid dimensions and coordinates are rejected.
+- Furniture can be added, edited, moved, rotated, duplicated, and removed where implemented.
+- Legacy projects without furniture data continue to load.
+- Saved layouts can be restored where supported.
+
+**B. Geometry**
+- Valid in-room placement.
+- Furniture-to-furniture overlap.
+- Furniture outside room boundaries.
+- Known wall and fixed-object intersection.
+- Valid and invalid room/floor assignments.
+- Multiple-floor isolation.
+- Edge cases involving rotation and boundary contact.
+- Non-finite coordinates, degenerate footprints, and invalid dimensions.
+
+**C. Doors and clearances**
+- Known door-opening conflicts.
+- Door-swing conflicts where the geometry is available.
+- Missing door or opening data is reported as unavailable.
+- User-configured thresholds are applied correctly.
+- Clearance calculations use consistent units.
+- Blocked paths and free paths are distinguished.
+- Inadequate route information does not produce a false pass.
+- Unsupported accessibility claims remain unavailable.
+
+**D. Suggestions and upstream modules**
+- Suggestions refer to real, valid furniture instances.
+- Applying a suggestion requires explicit user confirmation.
+- Hard constraints are not silently overridden.
+- Unconfirmed P30/P32 inferences do not become confirmed requirements.
+- Stale analysis results cannot overwrite newer results.
+- P30, P31, and P32 regression suites still pass where those modules exist.
+
+**E. Project safety**
+- Preview does not mutate the saved project.
+- Failed application leaves the project unchanged.
+- Snapshot creation and rollback work as documented.
+- Unrelated project data is preserved.
+- Cancellation does not leave partial furniture state.
+
+**F. System verification**
+- Run the P33 test suite.
+- Run the relevant P30, P31, and P32 regression tests.
+- Inspect the actual verification runner and run the full suite.
+- Run the actual TypeScript/lint checks.
+- Run the production build.
+- Report the real number of executed suites and their actual outcomes.
+
+Do not remove or weaken existing tests. Synthetic tests alone must not be presented as proof of complete real-world layout or accessibility compliance. Never claim an unexecuted test passed.
+
+### 17. IMPLEMENTATION DOCUMENTATION
+
+Create a document following repository conventions, such as:
+
+`docs/P33_FURNITURE_CIRCULATION_INTELLIGENCE_SPECIFICATION.md`
+
+Document:
+
+- Initial architecture inspection.
+- Furniture data model and catalog.
+- Supported shapes and limitations.
+- Coordinate and unit conventions.
+- Collision and containment algorithms.
+- Clearance thresholds and their provenance.
+- Door/opening validation capabilities and missing-data behaviour.
+- Circulation calculation method and limitations.
+- Layout suggestion behaviour.
+- P30/P31/P32 integration interfaces actually used.
+- Project persistence, snapshots, and rollback.
+- Tests actually executed and outcomes.
+- Remaining defects, limitations, and future integration risks.
+
+Clearly distinguish implemented features from planned or unsupported capabilities.
+
+### 18. ACCEPTANCE CRITERIA
+
+P33 is ready for review only when:
+
+1. The actual repository and upstream interfaces were inspected.
+2. Furniture can be represented and edited using real, validated data.
+3. Furniture placement is correctly associated with rooms and storeys.
+4. Supported geometric conflicts are detected accurately.
+5. Missing door/window or other geometry is not fabricated.
+6. Circulation checks use documented, consistent units and explicit thresholds.
+7. Geometric clearance results are not misrepresented as a complete accessibility audit.
+8. Suggestions are explainable and require user confirmation before modifying saved layouts.
+9. P30, P31, and P32 functionality remains intact.
+10. Existing project storage and rollback behaviour is preserved.
+11. P33 and relevant regression tests have actually been run.
+12. TypeScript/lint and production-build results are reported accurately.
+13. Known limitations and changed files are documented.
+14. P34–P40 have not been implemented.
+15. No GitHub operation or cross-account integration has been performed.
+16. P33 is not labelled Verified, Approved, or Complete unless its required checks genuinely passed.
+
+### 19. REQUIRED FINAL IMPLEMENTATION REPORT
+
+Return a structured report with:
+
+1. **Initial inspection:** What the existing codebase actually contained.
+2. **Implementation summary:** What was genuinely added and how it works.
+3. **Files created and modified:** Exact paths and reasons.
+4. **Furniture data:** Catalog capabilities, dimensions, supported shapes, and provenance.
+5. **Geometry validation:** Actual overlap, containment, door, and fixed-object checks.
+6. **Circulation analysis:** Implemented algorithms, thresholds, assumptions, and limitations.
+7. **Suggestions:** Which suggestions are genuinely computed and how they are previewed and applied.
+8. **P30/P31/P32 compatibility:** Actual interfaces reused and regression results.
+9. **Persistence and safety:** Snapshot, rollback, and data-preservation behaviour.
+10. **Test evidence:** Exact commands, outcomes, failures, and actual verification-suite counts.
+11. **Build results:** Actual lint/typecheck and production-build outcomes.
+12. **Limitations:** Unsupported cases, missing data, and known defects.
+13. **Future integration:** Shared-file changes, dependency risks, and interfaces to preserve.
+14. **Scope confirmation:** Confirm that P34–P40, GitHub operations, and cross-account integration were not performed.
+15. **Status:** Identify criteria passed, failed, and not yet verified.
+
+**Final priority: accurate geometry, honest clearance analysis, user-controlled design changes, robust project-state protection, and maintainable future integration. Quality is more important than the number of implemented features.**

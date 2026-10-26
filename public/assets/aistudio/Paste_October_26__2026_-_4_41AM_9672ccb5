@@ -1,0 +1,1093 @@
+# P38 — DAYLIGHT & VISUAL COMFORT ANALYZER
+## End-to-End Implementation Specification — Plotify Account A
+
+**Roadmap ID:** P38  
+**Feature:** Daylight & Visual Comfort Analyzer  
+**Product:** Plotify — Architecture Intelligence Platform  
+**Implementation mode:** Inspect → Plan → Implement → Verify → Report  
+**Primary objective:** Help users understand daylight availability, sunlight exposure, view-out opportunities, glare risks, and shading trade-offs using reliable geometry, traceable optical properties, and clearly bounded calculations.
+
+---
+
+# 1. MISSION
+
+Implement P38 as a dedicated, persistent and explainable daylight-analysis workspace within the current Plotify Account A codebase.
+
+The module must help users understand how room geometry, window placement, glazing properties, surface reflectance, external obstructions, orientation and shading influence daylight and visual comfort.
+
+It must support practical design questions:
+
+1. Which rooms may receive limited natural light?
+2. How do window size, location, glazing transmittance and room dimensions affect the daylight assessment?
+3. Which areas may experience direct sunlight or potential glare?
+4. How do external obstructions, neighbouring buildings, balconies, overhangs and shading devices influence the result?
+5. Can a proposed window or shading configuration improve daylight while controlling excessive direct sunlight?
+6. How does a design alternative compare with another under equivalent assumptions?
+7. What information is missing before a defensible daylight calculation can be made?
+8. Which conclusions are geometric screening results, calculated predictions, measured data, or merely scenario assumptions?
+
+P38 must be an engineering-aware design assistant, not merely a window-area calculator or an attractive lighting visualisation.
+
+The feature must clearly distinguish:
+
+- Geometric daylight potential.
+- Simplified daylight calculations.
+- Solar-position and shading calculations.
+- Climate-based annual daylight simulations.
+- Visual-comfort and glare screening.
+- Measured illuminance or luminance.
+- Reference criteria and legally applicable requirements.
+
+**Core rule:** Plotify must not claim a simulated, measured or compliant daylight result unless the relevant inputs, calculation method and evidence actually support that claim.
+
+Do not fabricate illuminance values, annual daylight metrics, sky conditions, sun positions, weather data, glare probability or visual-comfort compliance.
+
+# 2. LOCKED ROADMAP SCOPE
+
+Implement P38 only.
+
+Account A roadmap boundaries:
+
+- P30 — AI Design Brief Interpreter.
+- P31 — Multi-Option Design Comparison.
+- P32 — Adaptive Design Personalization.
+- P33 — Furniture & Circulation Intelligence.
+- P34 — Universal Accessibility Review.
+- P35 — Climate-Responsive Material Advisor.
+- P36 — Acoustic Comfort Planner.
+- P37 — Natural Ventilation Scenario Analyzer.
+- P38 — Daylight & Visual Comfort Analyzer — implement now.
+- P39 — Design Rationale & Decision History — future scope.
+- P40 — Design Quality Benchmark & Improvement Loop — future scope.
+
+Reuse existing P30–P37 contracts where appropriate. Do not rebuild their authoritative engines, duplicate their project state, or modify upstream results as an accidental side effect.
+
+P38 may read existing window and opening records, room geometry, north orientation, climate context, material properties, acoustic observations, and ventilation scenarios. It must not become a second natural-ventilation engine.
+
+P39's design-decision history and P40's benchmarking/improvement loop remain future responsibilities.
+
+Do not integrate Account A and Account B. Do not modify other repositories, connect GitHub, provision cloud services, or perform unrelated infrastructure or deployment work.
+
+# 3. INSPECT THE ACTUAL CODEBASE BEFORE EDITING
+
+Inspect the current code, exports, types, tests, persistence mechanisms and calling patterns before modifying any file.
+
+Previous Account A reports describe these relevant contracts. Verify them against the actual repository.
+
+## Project and geometry
+
+Inspect:
+
+- `src/types/project.ts`
+- `src/services/storage.ts`
+- Existing room and floor-plan geometry types.
+- Actual project unit conventions: `'feet'` or `'meters'`, or the units currently supported.
+- Site context, including any actual north-orientation fields.
+- Existing window, door and wall-opening records.
+- Existing design alternatives and facade concepts.
+- Existing 3D geometry helpers if appropriate for supported shading or obstruction geometry.
+- Project persistence, snapshots, versioning and rollback services.
+- Actual navigation, sidebar, project overview and workspace routing.
+
+## Upstream P30–P37
+
+Inspect the actual contracts and services for:
+
+- P30 — `briefService.ts`
+- P31 — `designComparisonService.ts`
+- P32 — `designPersonalizationService.ts`
+- P33 — `furnitureIntelligenceService.ts`
+- P34 — `accessibilityReviewService.ts`
+- P35 — `climateMaterialAdvisorService.ts`
+- P36 — `acousticComfortService.ts`
+- P37 — `naturalVentilationService.ts`
+
+Verify the availability and exact schema of relevant data, including:
+
+- Confirmed natural-light requirements.
+- Room coordinates and dimensions.
+- Ceiling heights and provenance.
+- Window dimensions and operability.
+- Opening wall-edge orientation.
+- Glazing and frame properties, where available.
+- Existing external or internal obstruction geometry.
+- Existing materials and property provenance.
+- Site orientation and supported geographic information.
+- Climate context and weather-data provenance.
+- P36 noise observations.
+- P37 opening scenarios and relevant outdoor conditions.
+- Existing stale-result fingerprints and scenario-comparison summaries.
+
+Do not infer that a field exists just because its name appears in a previous report.
+
+Do not assume every project has room height, window height, glass transmittance, external obstruction geometry, latitude, longitude or a weather file.
+
+Create a concise internal implementation plan and exact file-change inventory before editing. Then implement the scoped feature without waiting for further confirmation.
+
+If a required field or service is absent, implement a transparent incomplete-data workflow rather than inventing input values or altering an upstream module to create them.
+
+# 4. IMPLEMENTATION ARCHITECTURE
+
+Follow the current Plotify conventions.
+
+Use a dedicated P38 type/service/workspace structure where appropriate.
+
+Separate, where practical:
+
+- P38 assessment types.
+- Geometry and unit validation.
+- Window and glazing property validation.
+- Solar-position calculations.
+- Obstruction and shadow geometry.
+- Supported daylight calculation methods.
+- Glare and visual-comfort screening.
+- Scenario comparison.
+- Recommendation generation.
+- Source metadata and result provenance.
+- Persistence and stale-result handling.
+- Preview, apply and rollback.
+- Workspace UI and visualization.
+- Focused tests and documentation.
+
+Keep calculations out of a large monolithic React component.
+
+Use deterministic pure service functions for equivalent input states and the same calculation-method version.
+
+Do not replace validated mathematics with an opaque AI score.
+
+Do not add a major simulation dependency without inspecting its compatibility, licence, maintenance status, runtime constraints and actual ability to produce defensible results.
+
+If a validated annual daylight engine is unavailable, make a useful P38 geometric and solar-screening implementation first. Report annual metrics as unsupported until an appropriate model is genuinely implemented and verified.
+
+# 5. DATA MODEL AND PROVENANCE
+
+Create a versioned project-scoped daylight assessment model compatible with the existing Plotify project schema.
+
+Use the established optional feature-state conventions. Do not introduce a competing global store.
+
+The exact schema must reflect the actual source contracts, but should support the following logical concepts.
+
+## 5.1 Assessment identity
+
+- Schema version.
+- Assessment ID and project ID.
+- Scenario ID and name.
+- Selected room or supported room group.
+- Assessment-method version.
+- Creation and update timestamps.
+- Input fingerprint.
+- Result freshness.
+- Input completeness.
+- Calculation status.
+- Source-data versions.
+- Configured criteria.
+- Scenario assumptions.
+- Warnings, limitations and unresolved inputs.
+
+## 5.2 Provenance states
+
+Reuse existing provenance conventions where suitable. Distinguish at least:
+
+- Measured on site.
+- Manufacturer or laboratory test data.
+- Traceable generic reference.
+- Derived from project geometry.
+- User-entered.
+- Imported weather or sky data.
+- Illustrative scenario assumption.
+- Calculated result.
+- Unavailable or unverified.
+
+Record appropriate source information, such as source title, product identifier, edition or version, relevant conditions, units and access date.
+
+Do not automatically promote a user-entered visible-light-transmittance value to manufacturer-verified data.
+
+Do not treat a generic glass label as proof of a particular optical transmission value.
+
+Do not transform an illustrative sky or weather scenario into measured environmental evidence.
+
+## 5.3 Result-completeness states
+
+Use explicit states such as:
+
+- Sufficient for geometric screening.
+- Sufficient for solar-position screening.
+- Sufficient for the selected simplified calculation.
+- Sufficient for a climate-based simulation.
+- Insufficient evidence.
+- Unsupported model or geometry.
+- Invalid input.
+- Stale result.
+- Calculation failed.
+- Awaiting required environmental data.
+
+Do not reduce these states to one green/red score.
+
+# 6. ROOM GEOMETRY, UNITS AND ANALYSIS PLANES
+
+Reuse the actual room geometry in Plotify.
+
+Previous reports describe floor-plan rooms as 2D rectangles with coordinates, width, length, floor level and room type. They also describe ceiling-height provenance in P36. Verify the current contracts first.
+
+A room's floor area alone is insufficient to establish room volume or the complete vertical position of a window.
+
+## Geometry requirements
+
+Validate:
+
+- Finite room coordinates.
+- Positive room dimensions.
+- Supported length units.
+- Room-to-window associations.
+- Wall-edge and orientation information.
+- Opening width and height where required.
+- Sill and head heights where required.
+- Ceiling height and floor elevation where relevant.
+- Analysis-plane height and coverage.
+- Available roof, overhang, balcony and obstruction geometry.
+- Supported room shape.
+- Multiple-floor coordinate consistency.
+
+Do not reject valid zero-valued origin coordinates. Reject non-finite values and invalid physical dimensions.
+
+Convert supported source dimensions to a clearly documented internal unit system through one defined conversion path.
+
+Prevent double conversion between feet and metres.
+
+## Analysis plane
+
+Where a calculation needs a horizontal work plane or grid of points, make its height, spacing, extent and point-placement convention explicit.
+
+Do not silently assume that every room has the same work-plane height.
+
+Do not place analysis points outside the room, inside walls, or inside unsupported geometry.
+
+If a standards-based method requires a particular analysis grid or exclusion zone, implement it accurately only if permitted source material and reliable technical information are available. Otherwise describe the method as a preliminary screening approach rather than claiming standards conformity.
+
+# 7. WINDOWS, GLAZING AND OPTICAL PROPERTIES
+
+A valid window record must distinguish geometric dimensions from optical performance.
+
+Use the actual P33 opening contract and extend P38-specific scenario records only as necessary.
+
+Potential inputs include:
+
+- Opening ID.
+- Room ID.
+- Exterior wall orientation.
+- Width and height.
+- Sill and head height.
+- Glazed area.
+- Frame area or framing fraction where known.
+- Visible light transmittance (VT/Tvis).
+- Relevant glazing assembly type.
+- Interior shading.
+- Exterior shading.
+- Operable or fixed state where the scenario requires it.
+- Optical property provenance.
+- Source product and version.
+- Source conditions and uncertainty.
+
+Do not assume the entire opening area is transparent glazing.
+
+Do not infer VT from U-factor, solar heat-gain coefficient, or a broad material label. These properties are related to different physical behaviours and are not interchangeable.
+
+If only a window width is available, do not invent height or glazed area.
+
+If only the presence of a window is known, provide the available geometric classification and disclose that numerical daylight calculations are unsupported.
+
+Provide an appropriate data-entry workflow for missing glazing and opening properties.
+
+# 8. INTERIOR SURFACES AND EXTERNAL OBSTRUCTIONS
+
+Daylight distribution depends on more than window size.
+
+Where a selected model requires these properties, consider:
+
+- Wall reflectance.
+- Ceiling reflectance.
+- Floor reflectance.
+- Surface optical data and provenance.
+- Exterior building obstruction geometry.
+- Terrain or external features already available to the current project.
+- Balcony slabs and overhangs.
+- Fins, louvers and external shading.
+- Window recesses.
+- Frames and mullions.
+- Blinds or internal shading devices.
+- The geometry and state of movable shades.
+- Adjacent building obstruction data, where actually present.
+
+Do not manufacture a neighbouring building from an unverified assumption.
+
+Do not use an invented reflectance value as a verified material property.
+
+Where a scenario uses a generic or illustrative surface reflectance, label the result and preserve the assumption in the output.
+
+Do not duplicate a new authoritative material catalogue. Reuse existing material records when appropriate and store P38-specific optical properties separately with their own provenance.
+
+# 9. ASSESSMENT MODES
+
+P38 must expose which level of analysis is actually supported by the available inputs and calculation engine.
+
+## Mode A — Geometric Daylight Potential
+
+Evaluate the geometry and obvious constraints influencing daylight potential.
+
+Possible outputs include:
+
+- Window-to-floor-area ratio (where both areas are valid).
+- Window orientation.
+- Available glazed area.
+- Room depth relative to window and room dimensions.
+- Potential external obstruction.
+- Presence or absence of supported shading.
+- Geometry-derived daylight access indicators.
+- Missing input details.
+- Confirmed or unconfirmed natural-light requirements.
+
+These values describe geometry and potential. They are not equivalent to measured illuminance, daylight factor or annual daylight autonomy.
+
+Do not claim that a specific window-to-floor ratio proves compliance or sufficient daylight.
+
+## Mode B — Solar Position and Direct-Sun Screening
+
+Calculate or screen solar position and the relationship between solar direction, building orientation, window geometry and available shading.
+
+A defensible calculation may require:
+
+- Latitude and longitude.
+- Date.
+- Local time or a supported time-series input.
+- Time-zone and daylight-saving handling where relevant.
+- North-orientation convention.
+- Window and building orientation.
+- Shading geometry.
+- Any required terrain or external obstruction information.
+
+Do not infer latitude, longitude or precise local solar conditions from a project name or city string.
+
+If the necessary location or time inputs are unavailable, allow a user-defined hypothetical scenario and label it appropriately.
+
+Identify likely periods or directions of direct-sun penetration only when the implemented solar and shadow model supports that output.
+
+Do not fabricate a live sun position or shadow geometry.
+
+## Mode C — Simplified Daylight Calculation
+
+Offer a numerical calculation only when the required input properties and a defensible method are available.
+
+The implementation must document:
+
+- The actual model.
+- Assumptions.
+- Required inputs.
+- Units.
+- Sky or environmental boundary conditions.
+- Supported geometry.
+- Limitations.
+- Independent expected-value tests.
+
+If a simplified daylight-factor model is implemented, it must use a physically coherent daylight method and explicit sky conditions. Do not invent a daylight factor from window area or room depth alone.
+
+Do not claim that a simplified calculation is an EN 17037-compliant assessment unless the applicable method and required conditions have genuinely been implemented and verified.
+
+## Mode D — Climate-Based Annual Daylight Modelling
+
+Provide spatial Daylight Autonomy (sDA), Annual Sunlight Exposure (ASE), Daylight Autonomy (DA), Useful Daylight Illuminance (UDI), or other annual metrics only if the actual engine implements the necessary validated method and the input data supports it.
+
+Annual analysis may require:
+
+- Suitable hourly weather or daylight-climate data.
+- Exact location and time conventions.
+- Relevant sky and solar conditions.
+- Valid room and glazing geometry.
+- Optical properties.
+- Surface reflectance.
+- Analysis grid.
+- Shading control assumptions.
+- Required occupancy or analysis schedules.
+- A reproducible simulation configuration.
+
+Do not label an annual metric as calculated if the implementation merely uses static geometry, one sun angle or an arbitrary daylight score.
+
+If no genuine climate-based daylight engine is available, show annual simulation as unavailable and provide Modes A/B plus any genuinely supported Mode C calculation.
+
+Do not falsely claim that a Three.js rendering pass is a Radiance-quality or otherwise validated lighting simulation.
+
+## Mode E — Visual Comfort, Glare and View Out
+
+Assess glare and view-out opportunities only to the level supported by the model and data.
+
+Where available, consider:
+
+- Window position and visible area.
+- Direct-sun penetration.
+- Field of view.
+- Bright-sky or bright-window exposure.
+- Shading and blind configurations.
+- Potentially obstructed views.
+- Room use and user-selected visual priorities.
+
+Distinguish a qualitative glare concern from a validated glare metric.
+
+Do not fabricate Daylight Glare Probability (DGP), luminance maps or eye-level glare predictions from a simple geometric score.
+
+If an accurate glare calculation requires luminance distribution or a validated simulation that the engine does not provide, show a qualitative risk assessment with its limitations.
+
+## Mode F — Scenario Comparison
+
+Compare supported daylight and shading configurations while keeping the underlying room and environmental assumptions consistent when required.
+
+Example scenarios:
+
+- Existing window configuration.
+- Alternative window size or position.
+- Different glazing VT.
+- Exterior overhang versus no overhang.
+- Different blind or shading states.
+- Changed room surface reflectance assumptions.
+- Different hypothetical sun positions or supported sky conditions.
+- Alternative design options supplied through the actual P31 contract.
+
+For each comparison, show which inputs changed and whether the resulting outputs remain comparable.
+
+Do not compare a measured value in one scenario with an illustrative prediction in another as if the evidence were equivalent.
+
+# 10. PHYSICAL MODEL AND NUMERICAL GUARDRAILS
+
+All numerical outputs must be produced through testable service functions.
+
+Use explicit units, validate inputs, preserve internal precision and make calculations deterministic for the same input set and method version.
+
+Reject or qualify invalid, missing or unsupported data.
+
+Avoid hidden default optical properties and fallback coordinates.
+
+If the feature uses a simplified geometric proxy, label it as a proxy.
+
+Do not turn an approximate daylight-access indicator into a lux value or annual-performance result.
+
+Do not add a universal correction factor to force calculated values to match a desired score.
+
+For each implemented calculation, provide independent numerical test fixtures and documented tolerances.
+
+A result should identify:
+
+- Its method.
+- Its input set.
+- Its environmental assumptions.
+- Its data provenance.
+- Its supported range or geometry.
+- Its principal limitations.
+- The conditions that would make the result stale.
+
+If a result cannot be calculated meaningfully, return an insufficient-evidence state and explain which missing inputs are necessary.
+
+# 11. VISUAL COMFORT AND GLARE
+
+Visual comfort is broader than whether the room looks bright.
+
+Support structured screening for:
+
+- Potential excessive direct sunlight.
+- Bright-window exposure.
+- Possible glare from low-angle sunlight.
+- Potentially inadequate daylight access.
+- Shading strategy conflicts.
+- View-out obstruction.
+- Room-use requirements that may affect visual priorities.
+- Uncertain results caused by missing optical or environmental data.
+
+Do not conflate high daylight with good visual comfort.
+
+Do not automatically classify every east- or west-facing window as uncomfortable without considering actual geometry, time, shading and applicable assumptions.
+
+Do not treat a rendered bloom, brightness or emissive material as a scientific glare calculation.
+
+If the available model only supports qualitative screening, explain what further input or specialist analysis would be necessary to calculate a recognised glare metric.
+
+# 12. SHADING AND SOLAR-CONTROL SCENARIOS
+
+Allow users to examine supported alternatives involving:
+
+- External overhangs.
+- Side fins.
+- Louvers.
+- Interior blinds.
+- Exterior shading devices.
+- Changed shading dimensions.
+- Changed window orientation or size.
+- Different shading-state assumptions.
+
+Do not assume all shading devices have the same optical behaviour.
+
+Do not assume a blind blocks direct sunlight completely or that it transmits a known percentage without relevant optical data.
+
+Where supported, produce geometric sun/shadow results under a documented solar position. Otherwise, provide a clearly labelled conceptual comparison.
+
+Explain the trade-off between reducing direct-sun exposure and reducing daylight availability.
+
+Do not calculate energy savings, cooling demand or operational carbon as a P38 result unless the necessary validated model exists. Those claims must not be generated from the visual comparison alone.
+
+# 13. DAYLIGHT CRITERIA AND REGULATORY STATUS
+
+Do not hard-code one universal target for daylight factor, sDA, ASE, lux, sunlight duration or glare across all room types and jurisdictions.
+
+Provide a configurable criteria model where appropriate.
+
+A configured criterion should identify, as applicable:
+
+- Room or activity type.
+- Metric and units.
+- Target or range.
+- Source.
+- Jurisdiction and applicable standard.
+- Edition or version.
+- Applicability conditions.
+- Whether it is advisory, project-defined or legally required.
+- Verification status.
+
+Keep user-defined preferences separate from authoritative requirements.
+
+A reference value is not automatically a statutory requirement.
+
+A result that satisfies one daylight metric does not automatically satisfy every aspect of daylight provision, glare protection, view out or sunlight exposure.
+
+Do not claim compliance with EN 17037, ANSI/IES LM-83, or a local building code merely because a displayed threshold is met.
+
+Verify current public metadata and scope before documenting a standard as current. Use standards content only where licensing and access conditions permit.
+
+# 14. P30–P37 INTEGRATION CONTRACT
+
+Use the real source contracts discovered during inspection. Read upstream data where appropriate and keep authoritative upstream state unchanged.
+
+## P30 — AI Design Brief Interpreter
+
+Read confirmed natural-light requirements and supported room-use constraints.
+
+Keep inferred assumptions separate from confirmed requirements.
+
+Surface unresolved requirements and conflicts rather than silently converting them into hard constraints.
+
+Do not rewrite the design brief.
+
+## P31 — Multi-Option Design Comparison
+
+Expose a read-only, typed P38 summary where P31 supports it.
+
+Compare options using compatible metrics, units, environmental assumptions, calculation versions and evidence states.
+
+If one option lacks window height or optical data, clearly disclose the resulting comparison limitation.
+
+Do not alter P31's existing score engine or invent performance deltas.
+
+## P32 — Adaptive Design Personalization
+
+Use explicit natural-light and shading preferences where relevant.
+
+Keep inferred suggestions unconfirmed.
+
+A preference must not override mandatory constraints or evidence limitations.
+
+Do not overwrite P32's stored data.
+
+## P33 — Furniture & Circulation Intelligence
+
+Reuse actual openings and furniture geometry where supported.
+
+Furniture may provide an obstruction warning if a supported geometric condition indicates a potential blockage.
+
+Do not assign a numerical light reduction based only on furniture presence.
+
+Do not invent window heights, glazing properties or visible area from incomplete P33 records.
+
+## P34 — Universal Accessibility Review
+
+Preserve supported accessible circulation and operation constraints when proposing window or shade adjustments.
+
+Flag potential conflicts if a proposed control or shading intervention affects accessible reach, clearance or circulation.
+
+Do not reproduce P34's authoritative accessibility engine.
+
+## P35 — Climate-Responsive Material Advisor
+
+Reuse the existing material data and provenance where relevant.
+
+Do not assign visible transmittance or reflectance solely from a material category.
+
+Climate/material suitability does not prove optical performance.
+
+Do not modify P35's material catalogue or its existing carbon benchmarks.
+
+## P36 — Acoustic Comfort Planner
+
+Where relevant, show that window or shading scenarios may interact with noise exposure or existing acoustical requirements.
+
+Do not calculate or modify the P36 acoustic engine.
+
+A daylight improvement must not be presented as an unconditional overall design improvement if relevant acoustic constraints remain unresolved.
+
+## P37 — Natural Ventilation Scenario Analyzer
+
+Reuse supported window/opening geometry and the relevant existing scenario references where appropriate.
+
+Keep P37's airflow estimates, opening configurations and environmental source records authoritative.
+
+Do not reimplement wind/stack airflow, orifice flow, ACH or ventilation compliance calculations.
+
+If P38 proposes a physical window modification, disclose whether the associated P37 scenario may need recalculation or become stale.
+
+## P38 — Internal Separation
+
+Avoid circular service dependencies.
+
+Keep P38 calculations deterministic and independently testable.
+
+Do not trigger hidden P37 or other upstream mutations from daylight calculations.
+
+# 15. SCENARIO PREVIEW, APPLY, AND ROLLBACK
+
+P38 must not silently mutate the source architecture.
+
+For proposed design changes, use existing project preview and versioning conventions.
+
+Supported proposal types might include, where the project schema genuinely permits them:
+
+- Editing a supported window dimension.
+- Adjusting a configured shading geometry.
+- Changing a clearly identified optical assumption.
+- Updating a project-supported configuration field.
+
+If the source model does not support a proposed mutation, retain the scenario as a separate proposal rather than fabricating a persistent field.
+
+The workflow must:
+
+1. Generate a proposal against the current source state.
+2. Show the before-and-after diff.
+3. Identify affected rooms, windows, surfaces and analyses.
+4. Validate the proposed state.
+5. Compare the preview fingerprint with current relevant inputs.
+6. Create the required pre-apply snapshot using the actual existing service.
+7. Apply the supported mutation atomically.
+8. Restore the prior state if the operation fails.
+9. Mark affected P37 and other supported dependent results stale.
+10. Report failure honestly if snapshot, apply or rollback cannot complete.
+
+A proposed change must not become an applied change merely because the user opened a scenario panel.
+
+If a physical project mutation is not genuinely supported, keep the feature read-only and save the P38 scenario only.
+
+# 16. PERSISTENCE AND STALE-RESULT HANDLING
+
+Persist P38 using the existing project persistence conventions.
+
+Support:
+
+- A safe default for new projects.
+- Legacy projects that have no P38 property.
+- Save and reload of P38 scenarios.
+- Schema-version handling.
+- Stable scenario identifiers.
+- Result fingerprints.
+- Relevant geometry and optical-property versions.
+- Stale-input detection.
+- Corrupt or incomplete persisted data.
+- Bounded persistence growth.
+- Preservation of unrelated upstream project data.
+
+Do not duplicate all P30–P37 objects inside P38.
+
+Invalidate or mark results stale when relevant inputs change, including:
+
+- Room geometry.
+- Window dimensions or positions.
+- Glazing optical properties.
+- Surface reflectance.
+- Shading geometry or state.
+- External obstructions.
+- North orientation.
+- Solar-location/time inputs.
+- Weather file or climate-based simulation inputs.
+- Calculation method or criteria version.
+
+A stale result must not continue to appear as a current verified calculation.
+
+Do not rely exclusively on React object-reference equality to detect changes.
+
+# 17. USER EXPERIENCE AND WORKSPACE
+
+Create a dedicated P38 workspace using Plotify's existing navigation, layout and interaction conventions.
+
+Provide a clear workflow:
+
+1. Select a project and room or supported room group.
+2. Review available room and window geometry.
+3. Identify missing dimensions and optical properties.
+4. Select the desired assessment mode.
+5. Review environmental inputs and their source.
+6. Configure applicable criteria or explicitly labelled reference profiles.
+7. Run the selected assessment.
+8. Inspect results, visualizations, source data and limitations.
+9. Compare supported scenarios.
+10. Preview changes where supported.
+11. Apply changes only after explicit user confirmation.
+12. Save and reload the assessment through existing persistence.
+13. Export a useful report if supported by current application conventions.
+
+## Required UI sections
+
+Where appropriate, include:
+
+- Room selector.
+- Window and glazing inventory.
+- Surface and material properties.
+- Orientation and solar-location inputs.
+- External obstruction and shading editor.
+- Analysis-mode selector.
+- Evidence and completeness panel.
+- Daylight result view.
+- Solar/shadow view.
+- Glare and view-out screening.
+- Scenario comparison.
+- Cross-feature warnings.
+- Formula and source ledger.
+- Preview/apply controls.
+- Stale-result indicators.
+- Save and export controls.
+
+Use clear labels for different evidence levels:
+
+- Geometric screening.
+- Calculated estimate.
+- Annual simulation.
+- Measured value.
+- User assumption.
+- Insufficient evidence.
+
+Do not label a geometric approximation “simulation” unless an actual supported simulation is performed.
+
+Avoid an enormous form. Use a clear summary and progressive disclosure for technical inputs.
+
+Keep the workspace useful for users who have not supplied complete technical optical data.
+
+Do not add decorative controls that do not work.
+
+# 18. PERFORMANCE, PRIVACY AND EXTERNAL DATA
+
+## Performance
+
+- Avoid recalculating the entire project on each form keystroke.
+- Use deterministic caches only when their keys include all relevant inputs and method versions.
+- Avoid repeating expensive geometry intersections in nested render loops.
+- Clean up listeners and visualisation resources.
+- Avoid freezing the main UI while evaluating a larger scenario.
+- Provide a clear fallback for unsupported or overly complex geometry.
+- Do not introduce full annual simulation merely as a hidden UI operation.
+
+## Privacy and external data
+
+Do not add camera capture, eye tracking, microphone use, background location tracking or unrelated personal-data collection.
+
+Do not upload project geometry, user inputs or proprietary design data to an external analysis service unless an existing authorised workflow permits it.
+
+Do not add a new weather API just to claim climate-based daylight analysis.
+
+If location or climate data is unavailable, use an explicit user-entered or illustrative scenario and label it correctly.
+
+Do not embed API credentials in frontend code.
+
+Validate imported weather files and user-entered parameters.
+
+# 19. TECHNICAL REFERENCES AND RESEARCH RULES
+
+Verify relevant public source information and the applicable edition before documenting a method as current.
+
+Useful starting references:
+
+- **EN 17037:2018+A1:2021 — Daylight in buildings**, current listing and scope information from BSI: https://landingpage.bsigroup.com/LandingPage/Undated?UPI=000000000030342286
+- **ANSI/IES LM-83-23 — Spatial Daylight Autonomy (sDA) and Annual Sunlight Exposure (ASE)**, official IES product information: https://store.ies.org/product/approved-method-ies-spatial-daylight-autonomy-sda-and-annual-sunlight-exposure-ase/
+- **ISO 15469:2004 — Spatial distribution of daylight — CIE standard general sky**, official ISO record: https://www.iso.org/standard/38608.html
+- **ISO/CIE 15469**, new edition published in 2026 and described by ISO as under publication in its current record: https://www.iso.org/standard/90136.html
+
+These sources serve different purposes.
+
+EN 17037 addresses daylight provision, view out, sunlight exposure and glare protection principles. ANSI/IES LM-83-23 defines annual sDA and ASE methods that require suitable climate-based calculations, including hourly weather inputs. ISO/CIE 15469 concerns standardised sky luminance distributions. None of these sources by itself proves that P38 implements the relevant method.
+
+Do not reproduce copyrighted standards text, tables or protected worked examples. Do not upload licensed publications into AI tools unless the applicable licence explicitly permits it.
+
+Use public metadata, permitted source descriptions and independently documented original calculations. Cite source titles, editions and scope without implying that an unimplemented standard has been applied.
+
+# 20. REQUIRED TESTING
+
+Inspect the actual test runner and add a dedicated P38 suite using the existing conventions.
+
+Use realistic fixtures and independently calculated expected results.
+
+## Group A — Geometry and units
+
+Test:
+
+- Valid room geometry.
+- Missing ceiling height.
+- Valid zero-valued origin coordinates.
+- Invalid physical dimensions.
+- Feet-to-metre conversion.
+- Room and window associations.
+- Supported and unsupported room geometry.
+- Valid analysis-plane placement.
+- Window with incomplete dimensions.
+- Invalid glazing area or framing fraction.
+
+## Group B — Optical properties and provenance
+
+Test:
+
+- Valid VT/Tvis input.
+- Invalid or out-of-range optical values.
+- Unknown glazing property.
+- User-entered values retain provenance.
+- Product-specific data retains its source.
+- Generic material names do not produce fabricated VT.
+- Missing reflectance remains unknown or explicitly assumed.
+- Optical values are not inferred from U-factor or SHGC.
+- Invalid imported data is rejected or quarantined.
+
+## Group C — Solar position and shading
+
+Test:
+
+- Valid user-confirmed location and date/time.
+- Missing location.
+- North-orientation conversion.
+- Known reference solar-position fixtures for the chosen algorithm.
+- Window orientation and shading geometry.
+- External obstruction intersection.
+- Overhang scenario differences.
+- Invalid or unsupported geometry.
+- Time-zone and daylight-saving treatment where implemented.
+- No inferred location or solar conditions from a project title.
+- Shadow output matches the actual implemented model.
+
+## Group D — Daylight calculations
+
+Test only the calculation models actually implemented.
+
+For each numerical method, test:
+
+- Independently calculated expected values.
+- Unit consistency.
+- Valid input requirements.
+- Missing optical properties.
+- Valid sky or environmental boundary conditions.
+- Invalid geometry.
+- Deterministic outputs.
+- Documented rounding and tolerances.
+- Explicit limitations.
+- Unsupported methods do not produce fabricated results.
+
+If annual metrics are not implemented, test that requests for sDA, ASE, DA or UDI return an explicit unsupported/unavailable result rather than fake numbers.
+
+## Group E — Visual comfort and glare
+
+Test:
+
+- Direct-sun screening under supported inputs.
+- Missing shading geometry.
+- Qualitative glare warning.
+- Unsupported DGP calculation.
+- Missing luminance data.
+- View-out obstruction.
+- Invalid analysis viewpoint.
+- No universal glare claims from orientation alone.
+- No false claim of compliance.
+
+## Group F — Scenario comparison
+
+Test:
+
+- Two comparable scenarios.
+- Different window sizes.
+- Different supported glazing properties.
+- Changed shading state.
+- Changed solar conditions.
+- Missing inputs on one scenario.
+- Evidence-level differences.
+- Incomparable assumptions.
+- Stale scenario handling.
+- Correct before-and-after diff.
+
+## Group G — P30–P37 integration
+
+Test:
+
+- Confirmed P30 natural-light requirements.
+- Unconfirmed brief assumptions remain unconfirmed.
+- P31 receives the expected typed P38 summary.
+- P32 explicit preferences remain separate from suggestions.
+- P33 missing opening height is not fabricated.
+- P34 constraints are preserved.
+- P35 provenance is preserved.
+- P36 acoustic warnings remain intact.
+- P37 ventilation data is reused without recalculation or mutation.
+- Missing optional upstream modules do not crash P38.
+
+## Group H — Persistence and mutation safety
+
+Test:
+
+- New-project defaults.
+- Legacy project compatibility.
+- Save and reload.
+- Stable scenario IDs.
+- Input fingerprints.
+- Relevant input changes mark results stale.
+- Preview does not mutate source data.
+- Stale preview rejection.
+- Snapshot before supported mutation.
+- Failed apply restoration.
+- Rollback to the expected previous state.
+- Unrelated project and upstream data remains unchanged.
+
+## Group I — Workspace and regression
+
+Test:
+
+- P38 navigation and workspace loading.
+- Missing project or room.
+- Incomplete data.
+- Unsupported annual calculation.
+- Error and stale-result states.
+- Accessible labels and keyboard operation where supported.
+- Save and export flows.
+- Existing P30–P37 test suites remain intact.
+- P39 and P40 remain out of scope.
+
+Do not delete or weaken existing tests to make P38 pass.
+
+# 21. FULL SYSTEM VERIFICATION
+
+Before reporting completion:
+
+1. Run the dedicated P38 suite.
+2. Run the full existing verification runner.
+3. Run the actual lint/type-check command.
+4. Run the production build.
+5. Review all modified files and the final diff.
+6. Confirm P30–P37 functionality remains intact.
+7. Confirm the P38 workspace is reachable through actual navigation.
+8. Verify persistence, stale-result handling and rollback where implemented.
+9. Reconcile suite counts against actual runner output.
+10. Report every skipped or unsupported test honestly.
+11. Confirm P39 and P40 remain outside scope.
+12. Confirm no account integration, GitHub modification or unauthorised infrastructure work occurred.
+
+A successful build is not proof that a daylight calculation is physically valid.
+
+Do not claim measured illuminance, annual simulation, standards compliance, or validated glare predictions from mock tests or screenshot inspection.
+
+# 22. DOCUMENTATION
+
+Add concise P38 documentation consistent with existing project conventions.
+
+Document:
+
+- Purpose and scope.
+- Assessment modes.
+- Required room, window, optical and environmental inputs.
+- Provenance and completeness states.
+- Implemented numerical methods.
+- Equations, units and assumptions.
+- Unsupported metrics.
+- Criteria and source references.
+- P30–P37 integrations.
+- Scenario comparison.
+- Persistence, fingerprints and rollback.
+- Test commands actually executed.
+- Known limitations.
+- Professional-review boundaries.
+- P39 and P40 scope boundaries.
+
+Do not describe a planned simulation engine or future feature as implemented.
+
+# 23. REQUIRED ACCEPTANCE CRITERIA
+
+P38 is ready for checkpoint review only when the applicable criteria below are met.
+
+## Functionality
+
+- A dedicated P38 workspace is integrated into the existing application.
+- Valid geometry and optical information is reused correctly.
+- Geometric potential is distinguished from calculated performance.
+- Supported solar/shading assessments use documented input requirements.
+- Glare and view-out concerns are presented within the capabilities of the actual method.
+- Appropriate scenarios can be compared.
+- Missing evidence produces meaningful guidance.
+- Recommendations are traceable to identified inputs and conditions.
+
+## Evidence integrity
+
+- Missing location, weather, dimensions or optical properties are never fabricated.
+- The result identifies its method and assumptions.
+- Unsupported annual metrics and glare metrics are not assigned fake values.
+- Standards are not claimed as implemented or complied with merely because they appear in the source ledger.
+- Measured and predicted results remain distinct.
+- Provenance and confidence are visible.
+
+## Integration and safety
+
+- P30–P37 contracts are used according to their actual schemas.
+- Upstream data remains unchanged unless the user explicitly applies a supported proposal.
+- Stale results are identified.
+- Existing projects remain compatible.
+- Preview and rollback work where source mutations are supported.
+- P39 and P40 remain unimplemented.
+
+## Verification
+
+- Dedicated P38 tests pass.
+- The actual full-system regression runner has been executed and reported.
+- Type-check/lint and build results are accurate.
+- The final diff contains no unrelated changes.
+- Known limitations and unsupported calculations are documented.
+
+Mark unmet criteria as failed, incomplete or not tested. Do not silently treat them as passed.
+
+# 24. REQUIRED FINAL IMPLEMENTATION REPORT
+
+After implementation, provide a factual report using these sections:
+
+1. **Implementation summary** — what genuinely works.
+2. **Codebase inspection** — actual geometry, window, optical-property and persistence contracts.
+3. **Files created and modified** — exact paths and purpose.
+4. **Assessment modes** — supported and unsupported analysis methods.
+5. **Numerical models** — exact equations, units, assumptions and independent test values.
+6. **Solar and shading analysis** — implemented geometry, inputs and limitations.
+7. **Glare and view-out assessment** — actual method and evidence limits.
+8. **Data provenance** — sources, versions and completeness behaviour.
+9. **P30–P37 integration** — reused data and untouched upstream state.
+10. **Scenario comparison and recommendations** — real supported behaviour.
+11. **Persistence, stale detection and rollback** — actual tested outcomes.
+12. **Testing** — exact commands, suite counts and representative outputs.
+13. **Type-check and build** — commands and outcomes.
+14. **Known limitations** — unsupported geometry, simulation and data cases.
+15. **Scope confirmation** — P39/P40 and other-account integration remain out of scope.
+16. **Acceptance checklist** — passed, failed, incomplete or not tested, with evidence.
+
+Clearly distinguish implemented, unit-tested, integration-tested, manually inspected, simulated, measured and independently verified behaviour.
+
+Do not label P38 “Grand Audit passed,” “scientifically validated,” “professionally certified,” or fully approved solely because tests and build pass.
+
+# 25. FINAL EXECUTION INSTRUCTION
+
+Begin by inspecting the actual Account A codebase, including geometry, windows, materials, orientation, P30–P37 contracts, persistence and testing.
+
+Create the implementation plan and file-change inventory before changing code.
+
+Then implement P38 end-to-end within the current architecture, execute available verification commands, inspect the final diff and provide the complete implementation report in the same task.
+
+Prefer a defensible, explainable daylight assessment with accurate limits over a more impressive but unsupported simulation.
+
+Do not wait for additional approval to implement this scoped feature. Do not implement P39 or P40 early. Do not merge accounts, modify GitHub or provision new infrastructure.
+
+**P38's goal is to help users design better-lit, more visually comfortable spaces—and to make the evidence behind every daylight claim clear.**

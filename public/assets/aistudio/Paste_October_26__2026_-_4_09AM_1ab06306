@@ -1,0 +1,1456 @@
+# P37 — NATURAL VENTILATION SCENARIO ANALYZER
+## Production-Minded End-to-End Implementation Specification — Plotify Account A
+
+**Roadmap ID:** P37  
+**Feature:** Natural Ventilation Scenario Analyzer  
+**Product:** Plotify — Architecture Intelligence Platform  
+**Implementation mode:** Inspect → Plan → Implement → Verify → Report  
+**Primary objective:** Enable users to examine natural ventilation opportunities, compare design scenarios, understand possible airflow paths, and identify ventilation-related design constraints without fabricating airflow predictions, weather conditions, or regulatory compliance.
+
+---
+
+# 1. MISSION AND EXPECTED USER OUTCOME
+
+Implement P37 as a dedicated, persistent, explainable natural-ventilation analysis workspace within the existing Plotify Account A codebase.
+
+The purpose is to help users make better early-stage architectural decisions about operable windows, doors, air-transfer openings, room connectivity, high-level openings, cross-ventilation possibilities, and wind- or buoyancy-driven airflow.
+
+The feature must distinguish between:
+
+1. Geometric potential for natural ventilation.
+2. Qualitative airflow-path screening.
+3. Quantified airflow estimates supported by sufficient input data.
+4. Comfort-related considerations.
+5. Ventilation requirements established by a selected project criterion or applicable regulation.
+6. Measured or otherwise independently verified building performance.
+
+These are different types of evidence and must not be collapsed into one unsupported result.
+
+The workspace should answer practical questions such as:
+
+- Which rooms have suitable openings for natural ventilation?
+- Which rooms may be poorly connected to a plausible inlet-to-outlet airflow path?
+- Would a different opening configuration create a better ventilation opportunity?
+- Could cross-ventilation or stack-driven ventilation be feasible?
+- Which environmental conditions or missing dimensions prevent a meaningful calculation?
+- Could opening windows introduce additional outdoor noise, moisture, heat, humidity, or contaminated air?
+- Which assumptions materially affect the predicted or screened result?
+- When is mechanical ventilation, a dedicated exhaust system, professional analysis, or further measurement still needed?
+
+The feature must help users understand the evidence behind its recommendations rather than simply assigning every room a green or red ventilation score.
+
+**Core rule:** Natural-ventilation potential is not proof of adequate outdoor-air delivery, acceptable indoor air quality, thermal comfort, health safety, or regulatory compliance.
+
+Do not claim to perform CFD, wind-tunnel analysis, validated dynamic building simulation, contaminant dispersion simulation, or real-world measurement unless a genuine supported implementation exists.
+
+# 2. LOCKED ROADMAP SCOPE
+
+Implement P37 only.
+
+Account A's current roadmap:
+
+- P30 — AI Design Brief Interpreter.
+- P31 — Multi-Option Design Comparison.
+- P32 — Adaptive Design Personalization.
+- P33 — Furniture & Circulation Intelligence.
+- P34 — Universal Accessibility Review.
+- P35 — Climate-Responsive Material Advisor.
+- P36 — Acoustic Comfort Planner.
+- P37 — Natural Ventilation Scenario Analyzer — implement now.
+- P38 — Daylight & Visual Comfort Analyzer — future scope.
+- P39 — Design Rationale & Decision History — future scope.
+- P40 — Design Quality Benchmark & Improvement Loop — future scope.
+
+Use existing P30–P36 contracts where appropriate. Reuse upstream geometry, opening, climate, acoustic, preference, and constraint information. Do not rewrite those modules, duplicate their authoritative calculations, or modify their stored data as a side effect of running P37.
+
+Do not implement P38 daylight-factor, glare, solar-daylight, or visual-comfort analysis. Window geometry may be reused as existing input, but must not turn into a new daylight engine.
+
+Do not implement P39 decision-history infrastructure or P40 benchmarking and improvement loops.
+
+Do not integrate Account A with Account B, modify another account, connect or change a GitHub repository, provision cloud services, or introduce unrelated deployment and infrastructure work.
+
+The P37 workspace may save its own scenarios, assumptions, and results using existing project persistence conventions. This is not permission to build unrelated project-history or multi-account collaboration systems.
+
+# 3. INSPECT THE ACTUAL CODEBASE BEFORE EDITING
+
+Before modifying any file, inspect the actual current implementation.
+
+Do not rely solely on previous implementation reports. Verify real types, exported functions, component routing, persistence behaviour, and existing tests.
+
+Inspect at least:
+
+## Core project and persistence
+
+- `src/types/project.ts`
+- `src/services/storage.ts`
+- Current project creation and loading paths.
+- The actual project unit system.
+- Floor-plan and room geometry types.
+- The actual project snapshot, version, checkpoint, and restoration mechanisms.
+- Existing patterns for optional project-scoped feature state.
+- Existing feature-workspace navigation, project overview, sidebar, and application routing.
+- The verification runner and test conventions.
+
+## P30 — Design Brief Interpreter
+
+Inspect the current brief data contracts for:
+
+- Confirmed requirements.
+- Unconfirmed or inferred assumptions.
+- Conflicts.
+- Space programme and room-use requirements.
+- Existing ventilation-related requirements, if any.
+- Spatial relationships and restrictions.
+
+Never reinterpret an unconfirmed assumption as a confirmed ventilation requirement.
+
+## P31 — Multi-Option Design Comparison
+
+Inspect how P31 represents design alternatives and how it calculates or consumes feature summaries.
+
+Determine how P37 can expose a comparable summary without modifying P31's calculation engine.
+
+## P32 — Adaptive Design Personalization
+
+Inspect explicit-user preferences, suggested preferences, confidence/provenance states, and project-level preference contracts.
+
+Use explicit preferences appropriately and keep suggestions unconfirmed.
+
+## P33 — Furniture & Circulation Intelligence
+
+Inspect:
+
+- Actual `FloorPlanRoom` geometry.
+- Existing room coordinates and dimensions.
+- The real `knownOpenings` structure.
+- Opening widths, wall-edge orientation, opening types, and other available properties.
+- Furniture footprints and circulation information.
+- Any existing opening-state or operability fields.
+- Existing unit and coordinate conventions.
+
+An opening recorded as a window, door, or open passage must not automatically be assumed operable, fully open, unobstructed, or suitable for ventilation.
+
+## P34 — Universal Accessibility Review
+
+Inspect the actual route-clearance, turning-space, doorway, thresholds, and other applicable accessibility contracts.
+
+P37 must preserve these constraints when proposing opening adjustments, circulation changes, or ventilation layouts.
+
+## P35 — Climate-Responsive Material Advisor
+
+Inspect:
+
+- `ProjectClimateContext`.
+- Its unconfigured state and source-tier conventions.
+- Explicit user-entered climate information.
+- Reference screening profiles.
+- Material provenance and climate-compatibility results.
+- Relevant moisture, heat, wetting, and durability warnings.
+
+A reference screening profile is not proof of actual outdoor temperature, wind speed, humidity, or prevailing wind.
+
+## P36 — Acoustic Comfort Planner
+
+Inspect:
+
+- `src/types/acousticComfort.ts`
+- `src/services/acousticComfortService.ts`
+- Any current P36 workspace and acoustic summary contracts.
+- P36 room dimensions and ceiling-height provenance.
+- Existing noise observations, source classifications, and confidence states.
+- Existing stale-data and input-fingerprint patterns.
+
+P37 should recognise that opening a window can change the relationship between ventilation potential and outdoor-noise exposure. It must not overwrite the acoustic assessment or invent an acoustic improvement.
+
+Inspect all relevant callers and exported contracts before implementing any of these integrations.
+
+Create a concise internal implementation plan and exact planned file-change inventory before editing.
+
+Then proceed with the scoped implementation without waiting for further confirmation.
+
+If a required data field is missing, support a safe incomplete-data workflow. Do not invent a schema property, a room dimension, a weather observation, or an upstream result merely to make the calculation succeed.
+
+# 4. FEATURE ARCHITECTURE
+
+Follow the existing Plotify architecture and implementation conventions.
+
+Create or extend a dedicated P37 type/service/workspace structure appropriate to the current codebase.
+
+Separate responsibilities where practical:
+
+- P37 domain types and input validation.
+- Unit conversion and geometry preparation.
+- Opening and airflow-path analysis.
+- Environmental input validation.
+- Ventilation estimation models.
+- Scenario comparison.
+- Constraint and trade-off screening.
+- Recommendations and explanation generation.
+- Persistence, result freshness, preview, and rollback.
+- Workspace UI.
+- Tests and documentation.
+
+Keep numerical calculations out of large presentation components wherever possible.
+
+Use pure deterministic calculation functions for equivalent inputs and equivalent method versions.
+
+Avoid creating an opaque AI scoring engine in place of engineering logic.
+
+Do not add a major new dependency just to perform elementary geometry checks or unit conversion.
+
+A complex airflow library or simulation engine must not be added merely to make P37 appear more advanced. If a specialist library is genuinely necessary, inspect its capabilities, maintenance status, runtime compatibility, licensing, and input requirements; document the decision and maintain a clearly identified fallback.
+
+# 5. DATA MODEL AND EVIDENCE PROVENANCE
+
+Design a versioned, project-scoped P37 data model consistent with existing Plotify conventions.
+
+A likely optional project property may be appropriate, but inspect current patterns before selecting the actual property name.
+
+Do not introduce an independent global data store if the project already supports optional feature-specific state.
+
+## 5.1 Assessment identity and lifecycle
+
+Include fields or equivalent concepts for:
+
+- Schema version.
+- Assessment ID and project ID.
+- Scenario ID.
+- Scenario name.
+- Scenario type.
+- Creation and update timestamps.
+- Selected room or connected-room group.
+- Calculation-method version.
+- Input fingerprint.
+- Input-data completeness.
+- Result freshness.
+- Assessment status.
+- Active configuration.
+- User-visible assumptions.
+- Warnings and limitations.
+- Source metadata.
+- Supported proposed changes.
+
+Use the actual project and room identifiers.
+
+## 5.2 Required provenance states
+
+Reuse the project's existing provenance conventions where appropriate. Otherwise introduce an explicit P37 data-provenance model.
+
+Distinguish:
+
+- Measured on site.
+- Manufacturer or technical product data.
+- Traceable generic reference.
+- User-entered.
+- Imported environmental data.
+- Illustrative assumption.
+- Derived by calculation.
+- Unavailable or unverified.
+
+Every important environmental input and calculation result must be traceable to its source, units, conditions, and relevant method.
+
+A user-entered wind speed is not a measured site record unless its measurement status and source are declared.
+
+A climate reference profile is not an actual weather observation.
+
+An illustrative scenario must remain illustrative.
+
+A calculation using unverified inputs must not appear as verified building performance.
+
+Use explicit confidence and completeness states. Do not show a statistical probability of correctness unless a validated statistical method supports it.
+
+## 5.3 Required completeness states
+
+Support distinct states such as:
+
+- Sufficient input for the selected screening method.
+- Sufficient input for a documented preliminary airflow estimate.
+- Incomplete data; qualitative screening only.
+- Insufficient evidence for a meaningful result.
+- Stale result requiring recalculation.
+- Invalid input.
+- Unsupported geometry or airflow configuration.
+
+Do not turn all states into a binary pass/fail result.
+
+# 6. ROOM GEOMETRY AND PHYSICAL DIMENSIONS
+
+Use Plotify's existing project coordinate convention and units.
+
+The implementation report for P36 describes axis-aligned 2D rectangular rooms with fields such as room ID, room type, coordinates, width, length, and floor level. Verify the actual current schema.
+
+A natural-ventilation calculation may also require room height and opening elevation. Do not assume every room has a valid ceiling height.
+
+Where available, reuse verified or explicitly user-declared room-height information from the supported project contract. Preserve provenance.
+
+Where necessary, let users enter or confirm missing dimensions with clear units and provenance.
+
+## Geometry validation
+
+Validate:
+
+- Positive room dimensions.
+- Finite coordinates.
+- Supported length units.
+- Valid room-to-opening relationships.
+- Valid room adjacency.
+- Opening position and orientation where needed.
+- Opening dimensions and operable area.
+- Elevation and floor-height consistency where needed.
+- Valid room volume if the selected calculation requires it.
+
+A coordinate of zero may be valid. Do not reject zero-valued origin coordinates unless a particular field has a genuine physical reason to prohibit zero.
+
+Reject negative or non-finite physical dimensions.
+
+Do not allow an invalid room volume to produce an airflow-per-hour result.
+
+For a supported rectangular room:
+
+V = floor area × room height
+
+Use SI units internally where appropriate. Convert from project feet or metres through one well-defined conversion path.
+
+Do not infer true room volume from floor area alone.
+
+Where rooms are irregular or geometry is incomplete, use a method that supports that geometry or disclose the limitation. Never silently treat an arbitrary polygon as a perfect rectangle.
+
+# 7. OPENING MODEL — OPERABILITY AND FREE AREA
+
+Opening geometry is central to natural ventilation, but geometric presence alone is insufficient.
+
+Build a P37 opening model by consuming real supported P33 opening data and adding P37-specific fields only where needed and justified.
+
+The logical model should represent, as applicable:
+
+- Opening ID.
+- Associated room.
+- Wall or envelope side.
+- Opening type.
+- Width and height.
+- Sill and head height.
+- Vertical elevation.
+- Opening orientation.
+- Operable or fixed status.
+- Nominal opening area.
+- Clear free area.
+- Opening fraction or opening angle.
+- Discharge coefficient, where justified by source data.
+- Screen, louvre, restrictor, or other obstruction.
+- Actual or proposed opening state.
+- Source and provenance.
+- Applicability conditions.
+- Input fingerprint or source version.
+
+Do not automatically assume that every window or door is operable.
+
+Do not treat the entire frame or wall opening as an effective free-air area without considering supported geometry and configuration.
+
+If the actual P33 schema supplies only a width and wall orientation, do not invent a height or free area. Request the missing dimension or return an incomplete-data state.
+
+A generic opening-type label is not enough to assign a manufacturer-specific aerodynamic coefficient.
+
+Where an input is user-selected as an illustrative assumption, preserve that label in all dependent results.
+
+## Opening scenarios
+
+Where appropriate, allow users to compare:
+
+- Closed opening.
+- Partially open.
+- Fully open within known constraints.
+- Alternate opening configuration.
+- Internal door or transfer opening open/closed.
+- High-level opening or roof vent, if actual geometry supports it.
+- A proposed opening configuration that has not yet been applied to the project.
+
+These are scenario settings. They must not silently mutate P33 or the source floor plan.
+
+An opening state used in the calculation must be shown in the scenario configuration and result explanation.
+
+# 8. INTERNAL AIRFLOW PATHS AND ROOM CONNECTIVITY
+
+Natural ventilation depends on more than the exterior opening. The model must consider plausible intake, transfer, and outlet paths.
+
+Reuse real room adjacency, wall boundaries, and P33 known openings when the data supports them.
+
+Determine, where possible:
+
+- Which exterior openings serve a room.
+- Which openings connect two rooms.
+- Whether an internal door or opening provides a plausible flow path.
+- Whether the user has declared the opening closed, partly open, or open.
+- Which room pairs might support cross-ventilation.
+- Whether high-level and low-level openings provide a potential stack path.
+- Whether the available geometry is too incomplete to establish a credible route.
+
+Do not assume an internal transfer path exists merely because rooms touch on a 2D floor plan.
+
+Do not treat every connecting door as open.
+
+Do not infer that airflow can exit a building just because a window is present. A useful pressure-driven flow path normally depends on the complete path, boundary conditions, openings, and air-pressure differences.
+
+## Path classification
+
+Where supported, classify scenarios as:
+
+- Single-sided ventilation potential.
+- Cross-ventilation potential.
+- Stack or buoyancy-driven potential.
+- Combined wind-and-stack potential.
+- Incomplete or interrupted airflow path.
+- Insufficient geometry for classification.
+
+These are categories of potential, not guaranteed airflow outcomes.
+
+A route diagram or flow arrow should be labelled as a conceptual or calculated representation according to the actual model used.
+
+Do not describe a conceptual arrow as a CFD stream line.
+
+# 9. ENVIRONMENTAL CONDITIONS AND INPUT DATA
+
+Do not guess local weather conditions from a city name, project name, country, climate profile, or vague geographic location.
+
+P35's unconfigured project climate state must remain respected.
+
+## 9.1 Environmental input categories
+
+Where the selected model requires them, support:
+
+- Outdoor air temperature.
+- Indoor air temperature or relevant thermal boundary condition.
+- Temperature difference and provenance.
+- Wind speed.
+- Wind direction.
+- Wind reference height and any adjustment assumptions.
+- Building and opening orientation.
+- Wind-pressure coefficients or a documented supported alternative.
+- Air density or justified model assumptions.
+- Atmospheric pressure when relevant.
+- Outdoor humidity or dew point when relevant.
+- Indoor humidity or target conditions when relevant.
+- Weather scenario or time interval.
+- Outdoor air-quality observations relevant to the proposed scenario.
+- Rain or other environmental conditions when relevant to opening safety.
+- User-selected operating schedule.
+
+Each input must record its units, source, time or applicability window, and evidence state where relevant.
+
+Do not ask for specialist details that the chosen screening model does not need. Instead, define the inputs needed by each model and show the remaining uncertainties.
+
+## 9.2 Environmental-data acquisition
+
+Inspect the existing architecture for supported environmental-data services.
+
+If no suitable authorised source already exists, provide a transparent user-entered or properly formatted import workflow.
+
+Do not fabricate an API endpoint, invent API results, add an unauthorised external service, embed new API keys, or claim live weather data is available.
+
+If a real weather source is already integrated, document the source, supported location resolution, timestamp, units, missing-data behaviour, licence, and actual API behaviour.
+
+Do not derive real site wind direction, wind speed, air pollution, or temperature from a generic climate screening profile.
+
+Do not label historical climate averages as current weather.
+
+Do not label a forecast as a measured condition.
+
+A scenario based on assumed weather must remain clearly marked as a hypothetical scenario.
+
+# 10. ASSESSMENT MODES
+
+P37 must present a capability-aware assessment workflow.
+
+## Mode A — Geometric Ventilation Potential
+
+This mode examines room geometry, operable opening information, opening areas, room connectivity, and potential intake/outlet paths.
+
+Possible outputs:
+
+- Openable area, where dimensions support it.
+- Opening-area-to-floor-area ratio as a geometric descriptor.
+- Availability of plausible intake and outlet routes.
+- Potential for cross-ventilation.
+- Potential for single-sided ventilation.
+- Potential for high/low opening pathways.
+- Missing input details.
+- Physical or layout constraints.
+- Potential conflicts with other design requirements.
+
+A geometric ratio is not itself proof of sufficient ventilation.
+
+Do not claim compliance with a building-code opening-area requirement unless a valid jurisdiction-specific criterion is selected, correctly applied, and fully supported by the relevant data.
+
+## Mode B — Qualitative Airflow-Path Screening
+
+Use supported geometry and explicit assumptions to explain likely airflow opportunities and limitations.
+
+This mode can identify a potential opening-to-opening route, an interrupted transfer path, or a room with limited supported openings.
+
+It must not output a fabricated airflow rate or air-change rate.
+
+## Mode C — Quantified Preliminary Airflow Estimate
+
+Offer this mode only if the required physical inputs and supported calculation method are available.
+
+At a minimum, assess whether the method has adequate information about:
+
+- Opening dimensions and effective free area.
+- Opening configuration and discharge behaviour.
+- Room geometry where volume or distribution matters.
+- Pressure-driving conditions.
+- Relevant wind or stack boundary conditions.
+- Complete intake-to-outlet paths.
+- Necessary assumptions about air properties and losses.
+- The validity of the selected airflow model.
+
+If one or more essential inputs are missing, do not silently populate them with arbitrary defaults. Return a reasoned incomplete-data result, or allow a clearly labelled lower-confidence screening mode.
+
+## Mode D — Scenario Comparison
+
+Allow a user to compare reasonable opening and environmental scenarios.
+
+Examples may include:
+
+- Closed versus partially open windows.
+- Single-sided versus cross-ventilation layout.
+- Alternative intake and outlet positions.
+- Internal transfer opening closed versus open.
+- Lower versus higher wind conditions.
+- Different indoor/outdoor temperature differences.
+- User-selected operating schedules.
+- A hypothetical ventilation design before applying changes.
+
+Every scenario must preserve the same project identity, clearly expose relevant input differences, and state which outputs are genuinely comparable.
+
+A change in opening configuration must not be confused with a change in weather or room geometry.
+
+## Mode E — Insufficient-Data Guidance
+
+When meaningful quantification is not possible, explain:
+
+- Which required inputs are missing.
+- Why those inputs matter.
+- Whether geometric or qualitative assessment remains available.
+- What the user could provide to enable a stronger analysis.
+- Which conclusions cannot currently be drawn.
+
+Do not simply display “calculation failed” if the feature can explain the underlying limitation.
+
+# 11. WIND-DRIVEN AND STACK-DRIVEN CALCULATIONS
+
+Use a documented, physically coherent calculation strategy. Do not mix incompatible simplified formulas or add individually estimated airflow magnitudes in a way that ignores direction and pressure relationships.
+
+## 11.1 Wind-driven pressure
+
+Where appropriate and supported, a preliminary wind-pressure relation may use the recognised physical form:
+
+ΔP_wind = ½ × ρ × v² × ΔCp
+
+Where:
+
+- ΔP_wind is the pressure difference in pascals.
+- ρ is air density in kg/m³.
+- v is the applicable wind speed in m/s.
+- ΔCp is the difference between the relevant pressure coefficients at the connected openings.
+
+This relationship is a model input, not a universal guarantee of the pressure difference across a building.
+
+The correct wind direction, opening orientation, reference height, building exposure, and applicable pressure coefficients matter.
+
+Do not assign fabricated pressure coefficients to a particular building. If they cannot be determined from the available validated model or source data, keep the analysis qualitative or explicitly scenario-based.
+
+## 11.2 Buoyancy or stack-driven pressure
+
+Temperature differences and vertical separation can create buoyancy-driven pressure differences.
+
+If a simplified stack-pressure method is implemented, document:
+
+- The exact equation.
+- The temperature and pressure assumptions.
+- Air-density treatment.
+- Relevant opening elevations.
+- The height and vertical arrangement of the connected openings.
+- The conditions under which the approximation is valid.
+- Its limitations for real multi-storey or multi-opening flow.
+
+Do not claim that a single room-height value automatically determines real building airflow.
+
+## 11.3 Opening flow equation
+
+Where the selected physical model justifies it, the opening-flow relation may use a documented orifice-style form:
+
+Q = Cd × A_eff × √(2 × |ΔP| / ρ)
+
+Where:
+
+- Q is the flow magnitude in m³/s.
+- Cd is the discharge coefficient appropriate to the model and opening.
+- A_eff is the effective area in m².
+- ΔP is the pressure difference in pascals.
+- ρ is air density in kg/m³.
+
+This form applies only under the assumptions of the selected opening model.
+
+For multiple openings, series restrictions, parallel paths, bidirectional openings, or multi-zone systems, implement an appropriate validated pressure-flow/network method. Do not use a single-opening equation indiscriminately for an entire building.
+
+If the model cannot account for pressure interactions or relevant losses adequately, downgrade the output to a qualified screening result.
+
+Do not add wind-driven and stack-driven flow magnitudes blindly. Their effects depend on direction, pressure distribution, opening geometry, and the complete airflow network.
+
+## 11.4 Air changes per hour
+
+Where a defensible volumetric airflow rate and room volume are available, calculate:
+
+ACH = Q × 3600 / V
+
+Where:
+
+- ACH is air changes per hour.
+- Q is volumetric flow in m³/s.
+- V is room air volume in m³.
+- 3600 converts seconds to hours.
+
+Check units, signs, volume validity, flow direction, and the method's applicability.
+
+Make it clear that air changes per hour derived from an estimate are not equivalent to measured air changes or proof of sufficient outdoor-air ventilation.
+
+Do not display ACH when room volume or airflow has not been established appropriately.
+
+## 11.5 Numerical handling
+
+All calculation functions must:
+
+- Reject non-finite or invalid physical inputs.
+- Prevent division by zero.
+- Avoid invalid square-root operations.
+- Validate effective opening areas and discharge coefficients.
+- Use explicit unit conversions.
+- Preserve internal precision.
+- Apply documented display rounding.
+- Produce deterministic results for equivalent inputs and model versions.
+- Return structured warnings instead of silent fallback values.
+- Identify inputs that materially change the result.
+
+Include independently calculated test fixtures for every supported quantitative method.
+
+If the implementation cannot implement and validate a defensible airflow model within the current architecture, ship a strong geometry/qualitative screening workflow and explicitly mark quantified flow estimation unsupported for that scenario.
+
+# 12. INDOOR AIR QUALITY, MOISTURE, AND THERMAL CONSIDERATIONS
+
+Ventilation is not an unconditional benefit regardless of outdoor conditions.
+
+Where the data supports it, help users recognise trade-offs involving outdoor air quality, humidity, heat, moisture, and comfort.
+
+## 12.1 Outdoor air quality
+
+Allow the user to provide or import appropriately sourced outdoor air-quality observations where supported.
+
+Potential considerations include particulate matter, smoke, dust, ozone or other relevant contaminants, but do not invent measured concentrations.
+
+Do not automatically recommend opening windows when the supplied outdoor evidence identifies a material contamination concern.
+
+Do not assume outdoor air is clean.
+
+Do not calculate actual indoor pollutant concentrations from airflow alone unless the required contaminant source rates, initial conditions, mixing assumptions, removal mechanisms, and valid calculation model are implemented and documented.
+
+Do not introduce a live air-quality integration unless an authorised existing service supports it or it is explicitly within the permitted implementation environment.
+
+## 12.2 Temperature and humidity
+
+Where relevant input data exists, identify when the outdoor/indoor conditions may make ventilation thermally or moisture-wise undesirable.
+
+Distinguish:
+
+- Potential airflow.
+- Outdoor-air temperature.
+- Indoor temperature.
+- Humidity-related inputs.
+- Preliminary comfort implications.
+- Actual validated comfort calculation.
+
+Do not claim that natural ventilation will cool or dehumidify a room merely because an opening is available.
+
+Do not run a full energy or thermal-dynamics simulation under P37.
+
+Do not replace P35's climate-material assessment or claim moisture compatibility based only on airflow.
+
+## 12.3 Rain, insects, security, and privacy
+
+Where relevant data exists, provide prompts or constraint warnings about:
+
+- Rain exposure through an opening.
+- Screens or other reductions in effective opening area.
+- Window restrictors or limited opening angles.
+- Security or privacy restrictions reported by the user.
+- The availability of a suitable safe opening state.
+
+Do not infer that a window can safely be opened to its full extent from its nominal dimensions.
+
+Do not make legal or security-safety claims without relevant evidence.
+
+# 13. ACOUSTIC, ACCESSIBILITY, AND ARCHITECTURAL TRADE-OFFS
+
+P37 must support integrated design reasoning, not optimise airflow in isolation.
+
+## 13.1 P36 — Acoustic Comfort Planner
+
+Use the actual P36 acoustic contracts to identify relevant concerns when appropriate.
+
+Examples include:
+
+- An open window may provide a potential external-air path while admitting additional outdoor noise.
+- A scenario may conflict with a confirmed acoustic privacy requirement.
+- An internal door may form part of a ventilation path but also affect the acoustic separation between rooms.
+- An acoustic assessment based on different opening assumptions may become stale after a scenario change.
+
+Do not claim a predictable increase in dB without supported measurement or calculation.
+
+Do not modify P36's acoustic data.
+
+Keep a ventilation opportunity separate from its acoustic trade-offs.
+
+## 13.2 P34 — Universal Accessibility Review
+
+Any proposed layout or opening modification must preserve the relevant P34 constraints.
+
+Consider, where applicable:
+
+- Clear access routes.
+- Door clearances.
+- Accessible circulation.
+- Turning space.
+- Thresholds.
+- Potential obstructions caused by a proposed vent, door position, equipment, or control.
+
+Do not narrow circulation paths or invalidate accessibility constraints just to improve a ventilation screening score.
+
+Do not duplicate P34's accessibility engine.
+
+A successful ventilation assessment is not proof that a design is accessible.
+
+## 13.3 P33 — Furniture and Circulation
+
+Use actual furniture and geometry data only when relevant.
+
+If a furniture object may obstruct a supported airflow path, explain the geometric reason and the limitations. Do not invent an airflow reduction coefficient based solely on furniture appearance.
+
+Do not claim that a furniture arrangement has improved the measured or predicted airflow without a supported method.
+
+## 13.4 P35 — Climate and materials
+
+Reuse P35's explicit climate context and provenance where relevant.
+
+Do not promote an unconfigured climate context into measured weather.
+
+If a proposed opening or ventilation strategy has possible moisture or material-durability implications, surface appropriate P35 warnings without reimplementing its climate/material engine.
+
+Preserve P35's material source data and existing calculations.
+
+# 14. VENTILATION REQUIREMENTS AND REGULATORY CRITERIA
+
+Do not hard-code one universal minimum opening ratio, air-change rate, or ventilation rate for every room and building type.
+
+Natural-ventilation requirements can depend on jurisdiction, occupancy, building type, environmental conditions, opening design, outdoor-air quality, mechanical systems, and the applicable standard.
+
+Support configurable project criteria where appropriate.
+
+A criterion should identify relevant information such as:
+
+- Project jurisdiction.
+- Building and occupancy type.
+- Applicable standard or regulation.
+- Edition or adoption status.
+- Required metric.
+- Target or range.
+- Unit.
+- Applicability conditions.
+- Verification or source state.
+- Whether it is mandatory, project-defined, or advisory.
+- Relevant date or version.
+
+If the project has no configured applicable criterion, P37 may provide a geometric or preliminary reference assessment but must not claim regulatory compliance.
+
+A window-area ratio must never be automatically treated as evidence that ventilation-rate or indoor-air-quality requirements have been satisfied.
+
+Do not claim compliance with ASHRAE Standard 62.1, Standard 62.2, or a local building code merely because an estimated ACH is above a displayed number.
+
+Inspect current public metadata for relevant source titles, versions, and scope, but do not reproduce or upload proprietary standards content into an AI tool without proper authorisation.
+
+Do not fabricate standards clauses, equations, mandatory thresholds, editions, or regional applicability.
+
+# 15. P30–P36 INTEGRATION CONTRACT
+
+All integrations must be based on the actual code discovered during inspection.
+
+Read existing contracts wherever feasible and avoid upstream mutations.
+
+## P30 — AI Design Brief Interpreter
+
+Read confirmed natural-ventilation requirements, room-use constraints, privacy requirements, and applicable environmental design preferences where the actual schema supports them.
+
+Keep unconfirmed or inferred assumptions clearly separate.
+
+If the brief contains conflicting requirements—for example, a confirmed need for acoustic isolation and a proposed open airflow path—surface the conflict instead of silently choosing one requirement.
+
+Do not modify the original brief.
+
+## P31 — Multi-Option Design Comparison
+
+Expose a read-only, typed P37 summary using the actual P31 comparison contract.
+
+Compare supported scenarios only when their criteria, units, calculation versions, and input quality are sufficiently comparable.
+
+Potential summary fields include:
+
+- Ventilation-path classification.
+- Supported opening-area metrics.
+- Estimated airflow or ACH, only when defensible.
+- Input completeness.
+- Major constraints and unresolved issues.
+- Scenario assumptions.
+- Confidence/evidence status.
+
+Do not compare an estimated ACH from one scenario against a measured ACH from another without clearly labelling their differing evidence states.
+
+Do not change P31's existing scoring engine.
+
+## P32 — Adaptive Design Personalization
+
+Read actual explicit preferences when relevant.
+
+A user preference may influence scenario ranking—for example, preferring operable windows or a particular ventilation mode—but cannot override safety, mandatory constraints, missing evidence, or verified physical restrictions.
+
+Keep inferred suggestions unconfirmed.
+
+Do not change P32's saved preferences.
+
+## P33 — Furniture & Circulation Intelligence
+
+Reuse supported room geometry, known openings, opening orientations, furniture footprints, and connection information.
+
+Do not duplicate P33's furniture-layout engine.
+
+Do not assume missing window height, full free area, or actual operability.
+
+If P37 adds a new opening-state configuration, keep it as scenario data unless the current project model provides a verified and explicitly supported way to apply it.
+
+## P34 — Universal Accessibility Review
+
+Use P34's actual supported constraints to identify possible conflicts in proposed opening or circulation changes.
+
+Do not override P34's requirements.
+
+Do not label a layout accessible merely because the ventilation pathway is unobstructed in a simplified model.
+
+## P35 — Climate-Responsive Material Advisor
+
+Reuse actual P35 climate-context and material compatibility data.
+
+Respect the unconfigured default climate state.
+
+Do not convert a reference climate profile into a real weather observation.
+
+Do not reimplement climate-specific material selection, moisture calculations, or P44 carbon assessment.
+
+## P36 — Acoustic Comfort Planner
+
+Reuse actual P36 noise observations and relevant acoustic constraints.
+
+Flag potential trade-offs where an opening used for ventilation could conflict with existing noise or privacy requirements.
+
+Do not modify P36 acoustic assessments or silently recalculate their authoritative outputs.
+
+If relevant opening or room assumptions change, mark dependent P36 conclusions stale where the actual integration supports dependency tracking.
+
+## P37 — Internal Contracts
+
+Make P37 calculations deterministic and independently testable.
+
+Avoid circular dependencies between services.
+
+Do not introduce P37-to-P36 or other cross-service mutations as hidden calculation side effects.
+
+# 16. SCENARIO GENERATION AND RECOMMENDATIONS
+
+Generate explainable, actionable scenarios from real available inputs.
+
+Possible recommendations include:
+
+- Confirm the missing height of an existing opening.
+- Identify an opening as operable or fixed.
+- Record an actual clear free area.
+- Review whether an interior opening is intended to remain open.
+- Explore a potential cross-ventilation layout.
+- Evaluate the effect of a high-level opening when supported by geometry.
+- Compare partial-opening and full-opening assumptions.
+- Gather the necessary wind or indoor/outdoor condition data for a stronger estimate.
+- Review external-noise implications with P36.
+- Review moisture/material constraints with P35.
+- Review accessibility implications with P34.
+- Obtain a specialist analysis for a complicated multi-zone or performance-critical building.
+
+Every recommendation must disclose:
+
+1. The issue identified.
+2. The input or geometry that triggered it.
+3. The intended benefit.
+4. The conditions required for the recommendation to work.
+5. The evidence supporting it.
+6. The remaining uncertainty.
+7. Whether the recommendation is qualitative, calculated, measured, or illustrative.
+8. The potential impact on related disciplines.
+9. The next practical step.
+
+Do not claim a percentage increase in ventilation, cooling reduction, energy saving, or contaminant reduction without a supported quantitative method and complete relevant inputs.
+
+Do not manufacture a ranking to make every option look distinct.
+
+# 17. USER EXPERIENCE AND WORKSPACE
+
+Create a dedicated P37 workspace that follows Plotify's existing navigation and interface conventions.
+
+Use the real current application routes and feature patterns.
+
+Provide a clear workflow:
+
+1. Select the project and room or supported connected-room group.
+2. Review available geometry and units.
+3. Review room height and volume data where relevant.
+4. Inspect available openings and their operability.
+5. Confirm or enter missing dimensions and opening settings.
+6. Select the assessment mode.
+7. Enter or select the environmental scenario and source data where required.
+8. Configure relevant indoor/outdoor conditions and project criteria.
+9. Run the assessment.
+10. Inspect airflow-path visualisation, scenario results, limitations, and related discipline warnings.
+11. Compare alternative scenarios.
+12. Preview any proposed project changes.
+13. Apply supported changes only after an explicit user action.
+14. Save, export, or reopen the P37 scenario through established project mechanisms.
+
+## Required interface areas
+
+Where appropriate, provide:
+
+- Room selector.
+- Geometry and opening inventory.
+- Opening configuration panel.
+- Environment and scenario inputs.
+- Assessment-mode selector.
+- Input completeness and evidence panel.
+- Airflow-path diagram or clearly labelled geometry view.
+- Numerical result panel for supported calculations.
+- Comparison table for supported scenarios.
+- Constraints and warnings panel.
+- P30–P36 cross-discipline considerations.
+- Non-destructive proposal preview.
+- Save and export controls consistent with the project.
+- Stale-result and invalid-input states.
+
+Avoid a single enormous form.
+
+Organise the workspace around decisions and progressive disclosure. Users should be able to understand a preliminary screening without navigating through every advanced parameter.
+
+Provide a technical view for users who need the calculation assumptions, input values, units, formula versions, and source metadata.
+
+## Visualisation honesty
+
+Distinguish among:
+
+- Existing model geometry.
+- Known opening geometry.
+- User-configured opening states.
+- Conceptual airflow-path indicators.
+- Numerically estimated flow where supported.
+- Missing or uncertain airflow paths.
+
+Do not use realistic animated streamlines, velocity contours, or CFD-like output when the underlying model is only topological screening.
+
+If the result is qualitative, label the visual accordingly.
+
+A visually polished animation must not imply a higher level of computational accuracy than exists.
+
+# 18. INPUT VALIDATION AND UNITS
+
+Use explicit unit-aware fields and a well-defined internal unit system.
+
+Where applicable, use SI units internally:
+
+- Length: metres.
+- Area: square metres.
+- Volume: cubic metres.
+- Airflow: cubic metres per second.
+- Wind speed: metres per second.
+- Temperature: an explicitly documented internal convention.
+- Pressure: pascals.
+- Density: kilograms per cubic metre.
+- Time: seconds, with properly labelled conversions to hours.
+
+Convert from feet or other supported units at a clearly defined boundary.
+
+Avoid double conversion when P33 geometry or another service already provides normalized units.
+
+Temperature differences must be handled correctly; absolute temperatures and temperature deltas are not interchangeable.
+
+Validate:
+
+- Non-finite values.
+- Negative physical dimensions.
+- Invalid opening areas.
+- Invalid or absent room volume.
+- Unsupported units.
+- Physically implausible wind input.
+- Missing or contradictory weather timestamps.
+- Incorrect pressure or density units.
+- Impossible or unsupported opening configurations.
+- Empty and malformed scenario arrays.
+- Conflicting criteria.
+
+An empty optional field may represent unavailable evidence rather than zero.
+
+Never turn a missing opening dimension into zero area if zero is being used to mean unknown.
+
+Use explicit `null`, unknown, or equivalent states for unavailable values.
+
+# 19. PERSISTENCE, FINGERPRINTS, AND SAFE MUTATIONS
+
+Persist P37 through the existing project persistence conventions.
+
+Follow existing optional-project-property patterns when suitable.
+
+Support:
+
+- Safe defaults for new projects.
+- Backward compatibility for existing projects without P37 data.
+- Scenario persistence and reload.
+- Relevant input fingerprints.
+- Calculation and schema versions.
+- Stale-result detection.
+- Safe treatment of malformed persisted state.
+- Preservation of unrelated project data.
+- Bounded persistence growth.
+
+Do not duplicate the complete P30–P36 datasets inside P37 when stable references or concise summaries are sufficient.
+
+## Non-destructive scenario preview
+
+Creating or changing a scenario must not silently mutate the source project.
+
+If a proposed change affects a supported opening state or project geometry, show a clear before-and-after diff.
+
+## Safe apply
+
+Only allow applying a proposal when a valid supported project mutation exists.
+
+The workflow must:
+
+1. Validate the proposal.
+2. Verify that the preview's source fingerprint matches the current relevant project state.
+3. Create the required snapshot/checkpoint using the actual existing service.
+4. Apply the change atomically.
+5. Restore the prior state if the supported operation fails.
+6. Invalidate or mark dependent results stale.
+7. Report any failed rollback honestly.
+
+Do not invent an apply button that changes only temporary state while claiming the saved project has been changed.
+
+If no supported project mutation exists, P37 can remain read-only and save scenario configuration only.
+
+Use stable project, room, opening, and scenario identifiers. Do not rely solely on object-reference equality.
+
+# 20. PERFORMANCE AND ERROR HANDLING
+
+Use deterministic, efficient methods suited to the current app.
+
+Avoid recalculating all room and opening relationships on every small interface update if a more appropriate cached calculation is available.
+
+Any cache must include every relevant input, calculation version, and data-source version.
+
+Invalidate calculations when relevant geometry, opening state, wind input, temperature input, criteria, or room connectivity changes.
+
+Do not introduce blocking or unbounded calculations for an ordinary room layout.
+
+If a scenario needs a specialist simulation beyond the current architecture, mark it unsupported and provide a clear next step.
+
+Handle:
+
+- Missing project.
+- Missing room.
+- Invalid geometry.
+- Missing opening height.
+- Fixed or unknown opening operability.
+- Incomplete airflow path.
+- Missing environmental conditions.
+- Unsupported numerical model.
+- Invalid imported environmental record.
+- Stale scenario.
+- Calculation exception.
+- Failed persistence.
+- Failed checkpoint or apply.
+- Conflicting upstream constraints.
+
+Use meaningful messages that explain what happened and what input is needed.
+
+# 21. PRIVACY, EXTERNAL SERVICES, AND DATA GOVERNANCE
+
+Do not add background location tracking, microphone use, or unrelated device permissions.
+
+Do not upload project data, opening configurations, user-entered weather, or noise observations to an external service unless the existing architecture provides an explicitly authorised workflow for that purpose.
+
+Do not introduce a new external API merely to make P37 seem live.
+
+Validate imported records and user-entered environmental data.
+
+Preserve the source, time, units, licence, and evidence status of external information.
+
+Do not embed secrets, API keys, or credentials in frontend code.
+
+## Intellectual-property and standards handling
+
+Use source research responsibly.
+
+The official ASHRAE website currently presents an explicit restriction concerning entry of ASHRAE publication/IP content into AI tools. Do not paste, upload, or ingest proprietary ASHRAE standards, handbook chapters, or protected source material into an AI coding workflow unless suitable permission explicitly allows it.
+
+Do not reproduce copyrighted technical-standard text, tables, worked examples, or proprietary equations by copying them into code or documentation.
+
+Permitted work should instead use:
+
+- Public bibliographic and scope/status metadata.
+- Openly available authoritative sources within their applicable terms.
+- Properly licensed references or content supplied with appropriate permission.
+- Independently developed, documented physical models.
+- Original test fixtures and independently derived calculation checks.
+- Concise citations that identify the relevant source without reproducing protected content.
+
+Do not claim a method implements a specific standard unless that statement is accurate and supportable under the applicable rights and technical requirements.
+
+Record sources and licences in the way existing project conventions allow.
+
+# 22. TECHNICAL RESEARCH REFERENCES
+
+Verify source status and applicability at implementation time.
+
+Useful public starting points include:
+
+- ASHRAE Standards 62.1 and 62.2 public listing: https://www.ashrae.org/technical-resources/bookstore/standards-62-1-62-2
+- ASHRAE Handbook 2025 public chapter listing for Ventilation and Infiltration: https://handbook.ashrae.org/Handbooks/F25/SI/F25_Ch16/F25_Ch16_si.aspx
+- CIBSE AM10:2026 public publication metadata for Natural Ventilation in Non-Domestic Buildings: https://www.cibse.org//knowledge-research/knowledge-portal/am10-natural-ventilation-in-non-domestic-buildings-2026-pdf
+- CIBSE public guidance on ventilation: https://www.cibse.org/knowledge-research/knowledge-resources/engineering-guidance/cibse-top-tips/cibse-top-tips-1-ventilation-in-buildings-2015/
+- Official ASHRAE AI-policy document: https://www.ashrae.org/file%20library/about/position%20documents/ashrae-ai-policy-feb-2025.pdf
+
+The ASHRAE and CIBSE technical publications may contain protected or licensed content. Follow the source-governance requirements in Section 21. Publicly visible metadata does not mean the full publication is licensed for reuse in AI or code.
+
+CIBSE AM10:2026 is a current natural-ventilation guidance publication, but its existence does not mean P37 has implemented the full guidance or an equivalent professional design method.
+
+Do not claim compliance merely because a source is listed in documentation.
+
+# 23. REQUIRED TESTING
+
+Inspect the actual test runner and implement a dedicated P37 test suite following the current project conventions.
+
+Use realistic fixtures, independently checked results, and explicit assertions.
+
+## Group A — Geometry and units
+
+Test:
+
+- Valid rectangular room dimensions.
+- Supported unit conversion.
+- Known room floor area and volume.
+- Missing or invalid ceiling height.
+- Zero-valued origin coordinates.
+- Negative or non-finite physical dimensions.
+- Unsupported room geometry.
+- Room floor-level consistency where relevant.
+- Missing opening dimensions.
+- Correct area units and conversions.
+
+## Group B — Opening integrity
+
+Test:
+
+- Known operable opening with valid dimensions.
+- Fixed window versus operable window.
+- Unknown operability.
+- Correct openable/free-area calculation where supported.
+- Partial-opening configuration.
+- Full-opening constraints.
+- Screen or louvre reduction only where supported by documented inputs.
+- Unknown opening height does not become invented area.
+- Internal door/transfer opening states.
+- Opening ID and room association validity.
+
+## Group C — Airflow-path screening
+
+Test:
+
+- Single-sided opening classification.
+- Plausible cross-ventilation route.
+- Missing outlet.
+- Internal connection closed.
+- Missing internal pathway.
+- High/low opening arrangement where supported.
+- Disconnected-room cases.
+- Incomplete geometry produces a limitation state.
+- Conceptual airflow indicators are distinct from computed airflow.
+
+## Group D — Quantitative calculations
+
+Test each implemented model independently:
+
+- Known wind-pressure input with expected result.
+- Wind direction and coefficient applicability.
+- Stack/buoyancy pressure with known test values.
+- Single-opening flow with supported input.
+- Multi-opening network flow if actually implemented.
+- Unit consistency and conversions.
+- Correct airflow direction.
+- Correct handling of pressure sign.
+- No blind addition of wind and stack magnitudes.
+- Correct ACH conversion where supported.
+- Invalid values do not produce a numerical result.
+- Deterministic output.
+- Input completeness controls method availability.
+- Model limitations are returned with the result.
+
+For each quantitative test, calculate the expected value independently and document tolerances. Do not merely assert that an output is numeric.
+
+## Group E — Environmental data and evidence
+
+Test:
+
+- No configured climate context.
+- Reference screening profile not treated as actual weather.
+- User-entered weather assumptions remain user-entered.
+- Historical observation distinguished from forecast.
+- Missing timestamps.
+- Invalid units.
+- Source and time provenance preserved.
+- No live-data claim without a genuine source.
+- Outdoor pollution information unavailable.
+- Unsupported contaminant or comfort prediction rejected.
+- Stale environmental data invalidates or qualifies results.
+
+## Group F — Indoor/outdoor trade-offs
+
+Test:
+
+- Opening scenario with a P36 outdoor-noise concern.
+- Confirmed P30 acoustic privacy requirement.
+- P35 moisture-sensitive material warning.
+- P34 accessible clearance preservation.
+- P33 opening state not assumed without evidence.
+- Outdoor air quality concerns do not silently disappear.
+- Thermal-comfort conclusions require appropriate input data.
+- No unsupported cooling, energy saving, or contaminant reduction claims.
+
+## Group G — P30–P36 integration
+
+Test:
+
+- Confirmed P30 constraints remain separate from assumptions.
+- P31 receives a typed P37 summary.
+- Non-comparable inputs are not presented as equivalent results.
+- P32 explicit preferences remain distinct from suggestions.
+- P33 geometry and opening data are reused correctly.
+- P34 constraints are preserved.
+- P35 climate and material provenance remain intact.
+- P36 noise and privacy concerns remain intact.
+- Missing upstream optional data does not crash P37.
+- P37 does not overwrite any upstream feature state.
+
+## Group H — Scenarios and persistence
+
+Test:
+
+- Scenario creation and retrieval.
+- Save and reload.
+- New-project defaults.
+- Existing projects without P37 data.
+- Stable IDs.
+- Input fingerprints.
+- Stale results after opening changes.
+- Stale results after environmental changes.
+- Malformed persisted data.
+- Unrelated project data preservation.
+- Export/import compatibility where supported.
+
+## Group I — Preview, apply, and rollback
+
+Test:
+
+- Preview never mutates active project data.
+- Accurate before-and-after diff.
+- Stale preview rejected.
+- Valid snapshot created before supported mutation.
+- Successful atomic apply.
+- Simulated apply failure.
+- Restore on failure.
+- Rollback to the intended snapshot.
+- No false success message.
+- Scenario-only updates do not claim source geometry was modified.
+
+## Group J — User interface and regression
+
+Test:
+
+- Missing project.
+- No room selected.
+- Missing opening data.
+- Missing environmental data.
+- Qualitative screening remains usable.
+- Unsupported quantitative calculation is explained.
+- Scenario comparison.
+- Empty state and invalid state.
+- Navigation to and from P37.
+- Accessible labels, keyboard interaction, and error messaging where the environment supports them.
+- Existing P30–P36 functionality still passes regression verification.
+
+Do not weaken or delete existing tests to make P37 pass.
+
+# 24. FULL VERIFICATION AND RELEASE GATE
+
+Before concluding implementation:
+
+1. Run the focused P37 test suite.
+2. Run the full existing verification runner.
+3. Run the actual lint or type-check command.
+4. Run the production build command.
+5. Review the complete changed-file diff.
+6. Confirm that all earlier features remain compatible.
+7. Confirm persistence and restoration behaviour within the available test environment.
+8. Confirm the P37 workspace is connected through existing navigation.
+9. Confirm P38, P39, and P40 remain outside scope.
+10. Confirm no other account, GitHub repository, or external service was modified.
+11. Reconcile test-suite counts with the actual runner output.
+12. Clearly identify tests that were mocked, skipped, or not executable.
+
+Do not report a full verification pass solely because the production build succeeds.
+
+Do not invent test counts, source verification, live-data functionality, airflow measurements, screenshots, or engineering approvals.
+
+If a pre-existing runner issue affects counts, disclose it instead of hiding or fabricating a successful result.
+
+# 25. DOCUMENTATION REQUIREMENTS
+
+Create concise P37 documentation consistent with the project's existing documentation style.
+
+Document:
+
+- Purpose and scope.
+- Supported assessment modes.
+- Opening and room data requirements.
+- Provenance and completeness states.
+- Units and coordinate conventions.
+- Implemented calculation methods.
+- Equations and assumptions.
+- Valid input conditions.
+- Scenario-comparison method.
+- Environmental input sources and limitations.
+- P30–P36 integration contracts.
+- Project persistence, fingerprints, preview, apply, and rollback.
+- Tests actually executed.
+- Known limitations and unsupported conditions.
+- Regulatory and professional-review boundaries.
+- P38–P40 responsibilities explicitly deferred.
+
+Do not describe planned weather services, advanced calculations, or future integrations as implemented.
+
+# 26. REQUIRED ACCEPTANCE CRITERIA
+
+P37 is ready for checkpoint review only when applicable acceptance criteria below are met.
+
+## Core capability
+
+- A dedicated P37 workspace exists.
+- Supported room and opening geometry is reused correctly.
+- Opening operability is not fabricated from an opening label.
+- Users can examine plausible airflow pathways.
+- The implementation distinguishes geometric potential from airflow estimates.
+- Quantitative calculations are exposed only when the selected method has adequate inputs.
+- Units, provenance, assumptions, and limitations are visible.
+- Users can compare appropriate ventilation scenarios.
+
+## Evidence integrity
+
+- Missing dimensions and environmental inputs remain missing.
+- Reference climate data is not presented as actual weather.
+- Unsupported airflow rates, ACH, comfort metrics, and regulatory compliance are not fabricated.
+- Source metadata and evidence state are preserved.
+- Outdoor-air, moisture, acoustic, and accessibility constraints are not hidden by a simple score.
+
+## Integration
+
+- P30–P36 contracts are used correctly.
+- Upstream data remains unmodified unless the user explicitly applies a supported project change.
+- P37 does not duplicate P35 climate-material logic or P36 acoustic calculations.
+- P31 summaries are comparable only when the data supports comparison.
+- P38–P40 remain outside scope.
+
+## State safety
+
+- Scenarios persist correctly.
+- Preview is non-destructive.
+- Supported apply operations are checkpointed.
+- Failures are recoverable where the existing architecture supports recovery.
+- Stale geometry or environmental inputs invalidate or qualify relevant outputs.
+- Existing project data remains compatible.
+
+## Quality
+
+- Focused P37 tests pass.
+- Full regression verification is executed and reported accurately.
+- Type checking/lint and build results are reported honestly.
+- No unrelated regressions or scope expansion is introduced.
+- Documentation describes actual implemented behaviour.
+- No protected source material is ingested or reproduced without the appropriate permission.
+
+Any unmet criterion must be reported as failed, incomplete, or not tested rather than silently treated as passed.
+
+# 27. REQUIRED FINAL IMPLEMENTATION REPORT
+
+After implementation and available verification, return the final report in the following structure:
+
+1. **Implementation summary** — what genuinely works.
+2. **Repository inspection** — actual geometry, units, opening, persistence, and integration contracts.
+3. **Files created and modified** — exact paths and purpose.
+4. **Data model and provenance** — fields, source states, completeness, and stale handling.
+5. **Opening and airflow-path analysis** — what is geometrically screened and what is not.
+6. **Quantitative models** — exact equations implemented, assumptions, supported scenarios, and independent test values.
+7. **Environmental inputs** — actual sources, input paths, timestamps, units, and unavailable services.
+8. **P30–P36 integration** — actual reused contracts and limitations.
+9. **Scenario comparison and recommendations** — working behaviours and evidence boundaries.
+10. **Persistence, preview, apply, and rollback** — tested behaviour.
+11. **Testing** — exact commands, focused results, full-run results, suite counts, and relevant output.
+12. **Lint/type-check and production build** — exact commands and outcomes.
+13. **Known limitations** — incomplete inputs, unsupported models, and remaining risks.
+14. **Scope confirmation** — confirm P38–P40 and unrelated integration remained out of scope.
+15. **Acceptance checklist** — passed, failed, or not tested, with evidence.
+
+Clearly distinguish:
+
+- Implemented.
+- Unit-tested.
+- Integration-tested.
+- Manually inspected.
+- Modelled using supported calculations.
+- Measured on a real building.
+- Independently verified.
+
+Do not label the module “Grand Audit passed,” “professionally certified,” “scientifically validated,” or fully approved solely because tests and build pass.
+
+# 28. FINAL EXECUTION INSTRUCTION
+
+Begin by inspecting the actual Account A codebase and identifying the real contracts, dimensions, units, opening data, environmental inputs, persistence logic, and existing testing approach.
+
+Create the internal plan and file-change inventory before modifying code.
+
+Then implement P37 end-to-end within the existing architecture, execute the available tests and checks, inspect the final diff, and provide the required implementation report in this same task.
+
+Do not wait for additional approval to implement this scoped feature.
+
+Preserve working functionality. Prefer physically coherent calculations, transparent uncertainty, practical scenario comparison, and safe integration over decorative animation, unsupported precision, or unnecessary feature count.
+
+Do not connect accounts, modify GitHub, provision new infrastructure, or start the dedicated cross-feature Grand Audit.
+
+**P37's goal is to help Plotify users understand where natural ventilation may work, what evidence is needed to estimate it responsibly, and which design trade-offs must be resolved before treating a ventilation strategy as dependable.**
